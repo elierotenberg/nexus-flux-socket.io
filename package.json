@@ -1,21 +1,20 @@
 {
-  "name": "es6-starterkit",
+  "name": "nexus-flux-socket.io",
   "version": "0.0.0",
   "description": "",
-  "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/elierotenberg/es6-starterkit.git"
+    "url": "https://github.com/elierotenberg/nexus-flux-socket.io.git"
   },
   "author": "Elie Rotenberg <elie@rotenberg.io>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/elierotenberg/es6-starterkit/issues"
+    "url": "https://github.com/elierotenberg/nexus-flux-socket.io/issues"
   },
-  "homepage": "https://github.com/elierotenberg/es6-starterkit",
+  "homepage": "https://github.com/elierotenberg/nexus-flux-socket.io",
   "devDependencies": {
     "del": "^1.1.1",
     "gulp": "^3.8.10",
@@ -30,7 +29,15 @@
   "dependencies": {
     "6to5": "^2.9.4",
     "bluebird": "^2.6.2",
+    "body-parser": "^1.10.1",
+    "cors": "^2.5.2",
+    "express": "^4.10.7",
+    "immutable-request": "^0.3.1",
     "lodash": "^2.4.1",
-    "should": "^4.4.4"
+    "nexus-flux": "^0.1.0",
+    "should": "^4.4.4",
+    "socket.io": "^1.2.1",
+    "socket.io-client": "^1.2.1",
+    "through2": "^0.6.3"
   }
 }
