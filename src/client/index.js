@@ -1,7 +1,8 @@
 import SocketIOClient from 'socket.io-client';
+import through from 'through2';
 import { Client, Server } from 'nexus-flux';
 import { Requester } from 'immutable-request';
-import through from 'through2';
+
 import { CLIENT_EVENT, SERVER_EVENT } from '../constants';
 
 const ClientAdapterDuplex = through.ctor({ objectMode: true, allowHalfOpen: false },
@@ -42,12 +43,18 @@ class ClientAdapter extends ClientAdapterDuplex {
       socketOpts.should.be.an.Object;
       requesterOpts.should.be.an.Object;
     }
+    super();
     _.bindAll(this);
     Object.assign(this, {
       _socket: SocketIOClient(url, socketOpts),
       _requester: new Requester(url, requesterOpts),
     });
     this._socket.on(SERVER_EVENT, this._receiveFromSocket);
+    this._socket.on('reconnect_failed', this.end);
+  }
+
+  disconnect() {
+    this._socket.disconnect();
   }
 
   fetch(path, hash = null) {
@@ -78,4 +85,6 @@ class ClientAdapter extends ClientAdapterDuplex {
   }
 }
 
-export default ClientAdapter;
+export default {
+  Adapter: ClientAdapter, // 'nexus-flux-socket.io/dist/client'.Adapter
+};

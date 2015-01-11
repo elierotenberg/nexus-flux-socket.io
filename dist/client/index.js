@@ -1,5 +1,27 @@
 "use strict";
 
+var _get = function get(object, property, receiver) {
+  var desc = Object.getOwnPropertyDescriptor(object, property);
+
+  if (desc === undefined) {
+    var parent = Object.getPrototypeOf(object);
+
+    if (parent === null) {
+      return undefined;
+    } else {
+      return get(parent, property, receiver);
+    }
+  } else if ("value" in desc && desc.writable) {
+    return desc.value;
+  } else {
+    var getter = desc.get;
+    if (getter === undefined) {
+      return undefined;
+    }
+    return getter.call(receiver);
+  }
+};
+
 var _inherits = function (child, parent) {
   if (typeof parent !== "function" && parent !== null) {
     throw new TypeError("Super expression must either be null or a function, not " + typeof parent);
@@ -33,11 +55,11 @@ if (__DEV__) {
 }
 var SocketIOClient = _interopRequire(require("socket.io-client"));
 
+var through = _interopRequire(require("through2"));
+
 var Client = require("nexus-flux").Client;
 var Server = require("nexus-flux").Server;
 var Requester = require("immutable-request").Requester;
-var through = _interopRequire(require("through2"));
-
 var CLIENT_EVENT = require("../constants").CLIENT_EVENT;
 var SERVER_EVENT = require("../constants").SERVER_EVENT;
 
@@ -80,14 +102,20 @@ var ClientAdapter = (function () {
       socketOpts.should.be.an.Object;
       requesterOpts.should.be.an.Object;
     }
+    _get(Object.getPrototypeOf(ClientAdapter.prototype), "constructor", this).call(this);
     _.bindAll(this);
     Object.assign(this, {
       _socket: SocketIOClient(url, socketOpts),
       _requester: new Requester(url, requesterOpts) });
     this._socket.on(SERVER_EVENT, this._receiveFromSocket);
+    this._socket.on("reconnect_failed", this.end);
   };
 
   _inherits(ClientAdapter, _ClientAdapterDuplex);
+
+  ClientAdapter.prototype.disconnect = function () {
+    this._socket.disconnect();
+  };
 
   ClientAdapter.prototype.fetch = function (path) {
     var hash = arguments[1] === undefined ? null : arguments[1];
@@ -119,4 +147,6 @@ var ClientAdapter = (function () {
   return ClientAdapter;
 })();
 
-module.exports = ClientAdapter;
+module.exports = {
+  Adapter: ClientAdapter };
+// 'nexus-flux-socket.io/dist/client'.Adapter
