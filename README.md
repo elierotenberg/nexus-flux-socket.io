@@ -1,6 +1,8 @@
 Nexus Flux socket.io Adapter
 ============================
 
+This package implements the [socket.io adapter for Nexus Flux](https://github.com/elierotenberg/nexus-flux) to implement Flux over the Wire.
+
 Over the wire Nexus Flux Diagram using Websockets (with socket.io fallback)
 ```
 in the browser        socket.io frames     in the server
@@ -16,4 +18,34 @@ Component #B1 <---+                    |
 Component #B2 <---+-- SocketIOAdapter -+
                   |      Client B
 Component #B3 <---+
+```
+
+#### Usage
+
+In the client:
+
+```js
+import { Adapter } from 'nexus-flux-socket.io/dist/client';
+import { Client } from 'nexus-flux';
+const client = new Client(new Adapter('http://localhost:8080'));
+client.Store('/todoList')
+.onUpdate(({ head }) => console.warn('todoList updated', head))
+.onDelete(() => console.warn('todoList deleted'));
+
+client.Action('/removeItem').dispatch({ key: '42' });
+```
+
+In the server:
+
+```js
+import { Adapter } from 'nexus-flux-socket.io/dist/server';
+import { Server } from 'nexus-flux';
+const server = new Server(new Adapter(8080));
+const todoList = client.Store('/todoList');
+todoList
+.set('42', { name: 'Task #42', description: 'Do something useful with your life' })
+.commit();
+
+server.Action('/removeItem')
+.onDispatch(({ clientID, params }) => todoList.delete(params.key).commit());
 ```
