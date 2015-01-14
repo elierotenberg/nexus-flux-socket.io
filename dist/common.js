@@ -13,6 +13,6 @@ if (__DEV__) {
   Error.stackTraceLimit = Infinity;
 }
 module.exports = {
-  // disambiguation event names. not crytopgrahic.
-  CLIENT_EVENT: "__mK7AyNwykuJN",
-  SERVER_EVENT: "__YPZRG5KgUgeb" };
+  // this is just a disambiguation salt; this is by no mean a cryptographic
+  // device. this does NOT prevent active eavesdropping over inscured channel.
+  DEFAULT_SALT: "__ZQ8Ykv8HQVtWWyznJZax9uJS" };

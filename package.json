@@ -27,16 +27,16 @@
     "jshint-stylish": "^1.0.0"
   },
   "dependencies": {
-    "6to5": "^2.9.4",
+    "6to5": "^2.11.4",
     "asap": "^2.0.0",
-    "bluebird": "^2.6.2",
+    "bluebird": "^2.6.4",
     "cors": "^2.5.2",
     "express": "^4.10.7",
     "immutable-request": "^0.3.1",
     "lodash": "^2.4.1",
-    "nexus-flux": "^0.1.0",
-    "remutable": "^0.18.2",
-    "should": "^4.4.4",
+    "nexus-flux": "^1.0.0",
+    "remutable": "^0.18.3",
+    "should": "^4.6.0",
     "socket.io": "^1.2.1",
     "socket.io-client": "^1.2.1",
     "through2": "^0.6.3"
