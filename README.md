@@ -22,38 +22,65 @@ Component #B3 <---+
 
 #### Usage
 
-In the client:
+Share global server-side app state across all connected clients.
 
 ```js
-import { Adapter } from 'nexus-flux-socket.io/dist/client';
-import { Client } from 'nexus-flux';
-let release;
-const lifespan = new Promise((resolve) => release = resolve);
-const client = new Client(new Adapter('http://localhost:8080'));
-client.Store('/todoList', lifespan)
-.onUpdate(({ head }) => console.warn('todoList updated', head))
-.onDelete(() => console.warn('todoList deleted'));
-
-client.Action('/removeItem').dispatch({ key: '42' }, lifespan);
-
-setTimeout(release, 10000);
+// Client side: runs in the browser or in a node process
+import Client from 'nexus-flux-socket.io/client';
+const client = Client('http://localhost:8080'));
 ```
 
-In the server:
+```js
+// Server side: runs in a node process, which may or may not be the same process
+import Server from 'nexus-flux-socket.io/server';
+const server = new Server(8080);
+```
+
+#### Client usage example (in a React view)
 
 ```js
-import { Adapter } from 'nexus-flux-socket.io/dist/server';
-import { Server } from 'nexus-flux';
-let release;
-const lifespan = new Promise((resolve) => release = resolve);
-const server = new Server(new Adapter(8080));
-const todoList = client.Store('/todoList', lifespan);
+{
+  getInitialState() {
+    this.lifespan = new Lifespan();
+    return {
+      todoList: this.props.flux.Store('/todo-list', this.lifespan).value,
+    };
+  }
+
+  componentWillMount() {
+    this.props.flux.Store('/todo-list', this.lifespan)
+    .onUpdate(({ head }) => this.setState({ todoList: head }))
+    .onDelete(() => this.setState({ todoList: void 0 }));
+    this.removeItem = this.props.flux.Action('/remove-item', this.lifespan).dispatch;
+  }
+
+  componentWillUnmount() {
+    this.lifespan.release();
+  }
+
+  render() {
+    return this.state.todoList ? todoList.map((item, name) =>
+      <div onClick={() => this.removeItem({ name })}>
+        {item.get('description')} (Click to remove)
+      </div>
+    ) : null;
+  }
+}
+```
+
+#### Server usage example
+
+```js
+const todoList = server.Store('/todo-list', myApp.lifespan);
+const removeItem = server.Action('/remove-item', myApp.lifespan);
+
 todoList
-.set('42', { name: 'Task #42', description: 'Do something useful with your life' })
+.set('first', { description: 'My first item' })
+.set('second', { description: 'My second item' })
+.set('third', { description: 'My third item' })
 .commit();
 
-server.Action('/removeItem', lifespan)
-.onDispatch(({ clientID, params }) => todoList.delete(params.key).commit());
-
-setTimeout(release, 15000);
+removeItem.onDispatch((clientID, { name }) => {
+  todoList.delete(name).commit();
+});
 ```
