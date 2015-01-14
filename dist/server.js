@@ -182,6 +182,8 @@ var SocketIOServer = (function (Server) {
         _this2._public = null;
       });
 
+      _get(Object.getPrototypeOf(SocketIOServer.prototype), "constructor", _this2).call(_this2);
+
       _this2._app.listen(_this2._port);
     })();
   }

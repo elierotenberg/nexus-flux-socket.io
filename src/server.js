@@ -89,6 +89,8 @@ class SocketIOServer extends Server {
       this._public = null;
     });
 
+    super();
+
     this._app.listen(this._port);
   }
 
