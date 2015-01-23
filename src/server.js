@@ -19,12 +19,13 @@ class SocketIOLink extends Link {
     }
     this._io = io;
     this._salt = salt;
-    this._io.addListener(this._salt, this.receiveFromSocket);
+    const nsp = io.of('/');
+    nsp.addListener(this._salt, this.receiveFromSocket);
     super();
-    this._io.addListener('disconnect', this.lifespan.release);
+    nsp.addListener('disconnect', this.lifespan.release);
     this.lifespan.onRelease(() => {
-      this._io.removeListener(this._salt, this.receiveFromSocket);
-      this._io.removeListener('disconnect', this.lifespan.release);
+      nsp.removeListener(this._salt, this.receiveFromSocket);
+      nsp.removeListener('disconnect', this.lifespan.release);
       this._io.disconnect();
       this._io = null;
     });
@@ -69,6 +70,7 @@ class SocketIOServer extends Server {
     this._http = http.Server(this._app);
     this._app.use(cors());
     this._io = IOServer(this._http, sockOpts);
+    const nsp = this._io.of('/');
     this._public = {};
     this._app.get('*', ({ path }, res) => {
       if(this._public[path] === void 0) {
@@ -77,10 +79,10 @@ class SocketIOServer extends Server {
       return res.status(200).json(this._public[path].toJSON());
     });
 
-    this._io.addListener('connection', this.acceptConnection);
+    nsp.addListener('connection', this.acceptConnection);
 
     this.lifespan.onRelease(() => {
-      this._io.removeListener('connection', this.acceptConnection);
+      nsp.removeListener('connection', this.acceptConnection);
       this._io.close();
       this._io = null;
       this._http.close();

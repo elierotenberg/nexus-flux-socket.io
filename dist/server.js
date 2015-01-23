@@ -90,12 +90,13 @@ var SocketIOLink = (function (Link) {
       }
       _this._io = io;
       _this._salt = salt;
-      _this._io.addListener(_this._salt, _this.receiveFromSocket);
+      var nsp = io.of("/");
+      nsp.addListener(_this._salt, _this.receiveFromSocket);
       _get(Object.getPrototypeOf(SocketIOLink.prototype), "constructor", _this).call(_this);
-      _this._io.addListener("disconnect", _this.lifespan.release);
+      nsp.addListener("disconnect", _this.lifespan.release);
       _this.lifespan.onRelease(function () {
-        _this._io.removeListener(_this._salt, _this.receiveFromSocket);
-        _this._io.removeListener("disconnect", _this.lifespan.release);
+        nsp.removeListener(_this._salt, _this.receiveFromSocket);
+        nsp.removeListener("disconnect", _this.lifespan.release);
         _this._io.disconnect();
         _this._io = null;
       });
@@ -161,6 +162,7 @@ var SocketIOServer = (function (Server) {
       _this2._http = http.Server(_this2._app);
       _this2._app.use(cors());
       _this2._io = IOServer(_this2._http, sockOpts);
+      var nsp = _this2._io.of("/");
       _this2._public = {};
       _this2._app.get("*", function (_ref, res) {
         var path = _ref.path;
@@ -170,10 +172,10 @@ var SocketIOServer = (function (Server) {
         return res.status(200).json(_this2._public[path].toJSON());
       });
 
-      _this2._io.addListener("connection", _this2.acceptConnection);
+      nsp.addListener("connection", _this2.acceptConnection);
 
       _this2.lifespan.onRelease(function () {
-        _this2._io.removeListener("connection", _this2.acceptConnection);
+        nsp.removeListener("connection", _this2.acceptConnection);
         _this2._io.close();
         _this2._io = null;
         _this2._http.close();
