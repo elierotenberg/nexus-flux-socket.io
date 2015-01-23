@@ -108,7 +108,7 @@ var SocketIOClient = (function (Client) {
 
   _prototypeProperties(SocketIOClient, null, {
     fetch: {
-      value: function (path) {
+      value: function fetch(path) {
         var hash = arguments[1] === undefined ? null : arguments[1];
         if (__DEV__) {
           path.should.be.a.String;
@@ -124,7 +124,7 @@ var SocketIOClient = (function (Client) {
       configurable: true
     },
     sendToServer: {
-      value: function (ev) {
+      value: function sendToServer(ev) {
         if (__DEV__) {
           ev.should.be.an.instanceOf(Client.Event);
         }
@@ -135,7 +135,7 @@ var SocketIOClient = (function (Client) {
       configurable: true
     },
     receiveFromSocket: {
-      value: function (json) {
+      value: function receiveFromSocket(json) {
         if (__DEV__) {
           json.should.be.a.String;
         }

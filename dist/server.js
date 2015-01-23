@@ -106,7 +106,7 @@ var SocketIOLink = (function (Link) {
 
   _prototypeProperties(SocketIOLink, null, {
     sendToClient: {
-      value: function (ev) {
+      value: function sendToClient(ev) {
         if (__DEV__) {
           ev.should.be.an.instanceOf(Server.Event);
         }
@@ -117,7 +117,7 @@ var SocketIOLink = (function (Link) {
       configurable: true
     },
     receiveFromSocket: {
-      value: function (json) {
+      value: function receiveFromSocket(json) {
         if (__DEV__) {
           json.should.be.a.String;
         }
@@ -192,7 +192,7 @@ var SocketIOServer = (function (Server) {
 
   _prototypeProperties(SocketIOServer, null, {
     publish: {
-      value: function (path, remutableConsumer) {
+      value: function publish(path, remutableConsumer) {
         if (__DEV__) {
           path.should.be.a.String;
           remutableConsumer.should.be.an.instanceOf(Remutable.Consumer);
@@ -204,7 +204,7 @@ var SocketIOServer = (function (Server) {
       configurable: true
     },
     acceptConnection: {
-      value: function (io) {
+      value: function acceptConnection(io) {
         if (__DEV__) {
           isSocket(io).should.be["true"];
         }
