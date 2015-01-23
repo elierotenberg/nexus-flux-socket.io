@@ -34,7 +34,7 @@
     "express": "^4.11.1",
     "immutable-request": "^0.4.1",
     "lodash": "^2.4.1",
-    "nexus-flux": "^1.3.2",
+    "nexus-flux": "^1.4.0",
     "should": "^4.6.1",
     "socket.io": "^1.3.2",
     "socket.io-client": "^1.3.2",
