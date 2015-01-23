@@ -60,6 +60,7 @@ if (__DEV__) {
 }
 var Client = require("nexus-flux").Client;
 var Server = require("nexus-flux").Server;
+var Remutable = require("nexus-flux").Remutable;
 var Link = Server.Link;
 var express = _interopRequire(require("express"));
 
@@ -68,8 +69,6 @@ var cors = _interopRequire(require("cors"));
 var http = _interopRequire(require("http"));
 
 var IOServer = _interopRequire(require("socket.io"));
-
-var Remutable = _interopRequire(require("remutable"));
 
 var DEFAULT_SALT = require("./common").DEFAULT_SALT;
 

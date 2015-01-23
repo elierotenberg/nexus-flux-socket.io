@@ -1,10 +1,9 @@
-import { Client, Server } from 'nexus-flux';
+import { Client, Server, Remutable } from 'nexus-flux';
 const { Link } = Server;
 import express from 'express';
 import cors from 'cors';
 import http from 'http';
 import IOServer from 'socket.io';
-import Remutable from 'remutable';
 import { DEFAULT_SALT } from './common';
 
 function isSocket(obj) { // ducktype-check
