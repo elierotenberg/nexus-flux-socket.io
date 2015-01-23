@@ -156,6 +156,7 @@ var SocketIOServer = (function (Server) {
       }
       sockOpts.pingTimeout = sockOpts.pingTimeout || 5000;
       sockOpts.pingInterval = sockOpts.pingInterval || 5000;
+      _get(Object.getPrototypeOf(SocketIOServer.prototype), "constructor", _this2).call(_this2);
       _this2._port = port;
       _this2._salt = salt;
       _this2._app = express(expressOpts);
@@ -183,8 +184,6 @@ var SocketIOServer = (function (Server) {
         _this2._http = null;
         _this2._public = null;
       });
-
-      _get(Object.getPrototypeOf(SocketIOServer.prototype), "constructor", _this2).call(_this2);
 
       _this2._app.listen(_this2._port);
     })();

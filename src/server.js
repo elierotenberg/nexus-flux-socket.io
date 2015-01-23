@@ -64,6 +64,7 @@ class SocketIOServer extends Server {
     }
     sockOpts.pingTimeout = sockOpts.pingTimeout || 5000;
     sockOpts.pingInterval = sockOpts.pingInterval || 5000;
+    super();
     this._port = port;
     this._salt = salt;
     this._app = express(expressOpts);
@@ -90,8 +91,6 @@ class SocketIOServer extends Server {
       this._http = null;
       this._public = null;
     });
-
-    super();
 
     this._app.listen(this._port);
   }
