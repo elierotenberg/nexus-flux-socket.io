@@ -20,11 +20,11 @@ class SocketIOClient extends Client {
     }
     sockOpts.timeout = sockOpts.timeout || 5000;
     this._io = IOClient(uri, reqOpts);
-    this._io.addListener(this._salt, this.receiveFromSocket);
+    this._io.on(this._salt, this.receiveFromSocket);
     this._requester = new Requester(uri, reqOpts);
     super(clientID);
     this.lifespan.onRelease(() => {
-      this._io.removeListener(this._salt, this.receiveFromSocket);
+      this._io.off(this._salt, this.receiveFromSocket);
       this._io.reconnection(false);
       this._io.disconnect();
       this._io = null;

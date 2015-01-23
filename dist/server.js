@@ -169,7 +169,7 @@ var SocketIOServer = (function (Server) {
         if (_this2._public[path] === void 0) {
           return res.status(404).json({ err: "Unknown path: " + path });
         }
-        return res.status(200).json(_this2._public[path].toJS());
+        return res.status(200).json(_this2._public[path].toJSON());
       });
 
       nsp.addListener("connection", _this2.acceptConnection);
