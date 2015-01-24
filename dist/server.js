@@ -158,9 +158,8 @@ var SocketIOServer = (function (Server) {
       _get(Object.getPrototypeOf(SocketIOServer.prototype), "constructor", _this2).call(_this2);
       _this2._port = port;
       _this2._salt = salt;
-      _this2._app = express(expressOpts);
+      _this2._app = express(expressOpts).use(cors());
       _this2._http = http.Server(_this2._app);
-      _this2._app.use(cors());
       _this2._io = IOServer(_this2._http, sockOpts);
       var nsp = _this2._io.of("/");
       _this2._public = {};

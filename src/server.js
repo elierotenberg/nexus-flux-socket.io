@@ -66,9 +66,8 @@ class SocketIOServer extends Server {
     super();
     this._port = port;
     this._salt = salt;
-    this._app = express(expressOpts);
+    this._app = express(expressOpts).use(cors());
     this._http = http.Server(this._app);
-    this._app.use(cors());
     this._io = IOServer(this._http, sockOpts);
     const nsp = this._io.of('/');
     this._public = {};
