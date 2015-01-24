@@ -94,8 +94,7 @@ var SocketIOClient = (function (Client) {
       _get(Object.getPrototypeOf(SocketIOClient.prototype), "constructor", _this).call(_this, clientID);
       _this.lifespan.onRelease(function () {
         _this._io.off(_this._salt, _this.receiveFromSocket);
-        _this._io.reconnection(false);
-        _this._io.disconnect();
+        _this._io.disconnect(); // will call this._io.destroy(), ensuring we dont get reconnected
         _this._io = null;
         _this._requester.cancelAll(new Error("Client lifespan released"));
         _this._requester.reset();

@@ -25,8 +25,7 @@ class SocketIOClient extends Client {
     super(clientID);
     this.lifespan.onRelease(() => {
       this._io.off(this._salt, this.receiveFromSocket);
-      this._io.reconnection(false);
-      this._io.disconnect();
+      this._io.disconnect(); // will call this._io.destroy(), ensuring we dont get reconnected
       this._io = null;
       this._requester.cancelAll(new Error('Client lifespan released'));
       this._requester.reset();
