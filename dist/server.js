@@ -79,25 +79,22 @@ function isSocket(obj) {
 }
 
 var SocketIOLink = (function (Link) {
-  function SocketIOLink(io) {
+  function SocketIOLink(socket) {
     var _this = this;
     var salt = arguments[1] === undefined ? DEFAULT_SALT : arguments[1];
     return (function () {
       if (__DEV__) {
-        isSocket(io).should.be["true"];
+        isSocket(socket).should.be["true"];
         salt.should.be.a.String;
       }
-      _this._io = io;
+      _this._socket = socket;
       _this._salt = salt;
-      var nsp = io.of("/");
-      nsp.addListener(_this._salt, _this.receiveFromSocket);
+      socket.on(_this._salt, _this.receiveFromSocket);
       _get(Object.getPrototypeOf(SocketIOLink.prototype), "constructor", _this).call(_this);
-      nsp.addListener("disconnect", _this.lifespan.release);
+      socket.on("disconnect", _this.lifespan.release);
       _this.lifespan.onRelease(function () {
-        nsp.removeListener(_this._salt, _this.receiveFromSocket);
-        nsp.removeListener("disconnect", _this.lifespan.release);
-        _this._io.disconnect();
-        _this._io = null;
+        socket.disconnect();
+        _this._socket = null;
       });
     })();
   }
@@ -110,7 +107,7 @@ var SocketIOLink = (function (Link) {
         if (__DEV__) {
           ev.should.be.an.instanceOf(Server.Event);
         }
-        this._io.emit(this._salt, ev.toJSON());
+        this._socket.emit(this._salt, ev.toJSON());
       },
       writable: true,
       enumerable: true,
@@ -156,34 +153,21 @@ var SocketIOServer = (function (Server) {
       sockOpts.pingTimeout = sockOpts.pingTimeout || 5000;
       sockOpts.pingInterval = sockOpts.pingInterval || 5000;
       _get(Object.getPrototypeOf(SocketIOServer.prototype), "constructor", _this2).call(_this2);
-      _this2._port = port;
-      _this2._salt = salt;
-      _this2._app = express(expressOpts).use(cors());
-      _this2._http = http.Server(_this2._app);
-      _this2._io = IOServer(_this2._http, sockOpts);
-      var nsp = _this2._io.of("/");
-      _this2._public = {};
-      _this2._app.get("*", function (_ref, res) {
-        var path = _ref.path;
-        if (_this2._public[path] === void 0) {
-          return res.status(404).json({ err: "Unknown path: " + path });
-        }
-        return res.status(200).type("application/json").send(_this2._public[path].toJSON());
-      });
 
-      nsp.addListener("connection", _this2.acceptConnection);
+      _this2._salt = salt;
+      _this2._public = {};
+      var app = express(expressOpts).use(cors());
+      var server = http.Server(app);
+      var io = IOServer(server, sockOpts);
+      server.listen(port);
+      app.get("*", _this2.serveStore);
+      io.on("connection", _this2.acceptConnection);
 
       _this2.lifespan.onRelease(function () {
-        nsp.removeListener("connection", _this2.acceptConnection);
-        _this2._io.close();
-        _this2._io = null;
-        _this2._http.close();
-        _this2._app = null;
-        _this2._http = null;
+        io.close();
+        server.close();
         _this2._public = null;
       });
-
-      _this2._app.listen(_this2._port);
     })();
   }
 
@@ -202,12 +186,24 @@ var SocketIOServer = (function (Server) {
       enumerable: true,
       configurable: true
     },
-    acceptConnection: {
-      value: function acceptConnection(io) {
-        if (__DEV__) {
-          isSocket(io).should.be["true"];
+    serveStore: {
+      value: function serveStore(_ref, res) {
+        var path = _ref.path;
+        if (this._public[path] === void 0) {
+          return res.status(404).json({ err: "Unknown path: " + path });
         }
-        this.acceptLink(new SocketIOLink(io, this._salt));
+        return res.status(200).type("application/json").send(this._public[path].toJSON());
+      },
+      writable: true,
+      enumerable: true,
+      configurable: true
+    },
+    acceptConnection: {
+      value: function acceptConnection(socket) {
+        if (__DEV__) {
+          isSocket(socket).should.be["true"];
+        }
+        this.acceptLink(new SocketIOLink(socket, this._salt));
       },
       writable: true,
       enumerable: true,

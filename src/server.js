@@ -11,22 +11,19 @@ function isSocket(obj) { // ducktype-check
 }
 
 class SocketIOLink extends Link {
-  constructor(io, salt = DEFAULT_SALT) {
+  constructor(socket, salt = DEFAULT_SALT) {
     if(__DEV__) {
-      isSocket(io).should.be.true;
+      isSocket(socket).should.be.true;
       salt.should.be.a.String;
     }
-    this._io = io;
+    this._socket = socket;
     this._salt = salt;
-    const nsp = io.of('/');
-    nsp.addListener(this._salt, this.receiveFromSocket);
+    socket.on(this._salt, this.receiveFromSocket);
     super();
-    nsp.addListener('disconnect', this.lifespan.release);
+    socket.on('disconnect', this.lifespan.release);
     this.lifespan.onRelease(() => {
-      nsp.removeListener(this._salt, this.receiveFromSocket);
-      nsp.removeListener('disconnect', this.lifespan.release);
-      this._io.disconnect();
-      this._io = null;
+      socket.disconnect();
+      this._socket = null;
     });
   }
 
@@ -34,7 +31,7 @@ class SocketIOLink extends Link {
     if(__DEV__) {
       ev.should.be.an.instanceOf(Server.Event);
     }
-    this._io.emit(this._salt, ev.toJSON());
+    this._socket.emit(this._salt, ev.toJSON());
   }
 
   receiveFromSocket(json) {
@@ -64,33 +61,21 @@ class SocketIOServer extends Server {
     sockOpts.pingTimeout = sockOpts.pingTimeout || 5000;
     sockOpts.pingInterval = sockOpts.pingInterval || 5000;
     super();
-    this._port = port;
-    this._salt = salt;
-    this._app = express(expressOpts).use(cors());
-    this._http = http.Server(this._app);
-    this._io = IOServer(this._http, sockOpts);
-    const nsp = this._io.of('/');
-    this._public = {};
-    this._app.get('*', ({ path }, res) => {
-      if(this._public[path] === void 0) {
-        return res.status(404).json({ err: `Unknown path: ${path}` });
-      }
-      return res.status(200).type('application/json').send(this._public[path].toJSON());
-    });
 
-    nsp.addListener('connection', this.acceptConnection);
+    this._salt = salt;
+    this._public = {};
+    const app = express(expressOpts).use(cors());
+    const server = http.Server(app);
+    const io = IOServer(server, sockOpts);
+    server.listen(port);
+    app.get('*', this.serveStore);
+    io.on('connection', this.acceptConnection);
 
     this.lifespan.onRelease(() => {
-      nsp.removeListener('connection', this.acceptConnection);
-      this._io.close();
-      this._io = null;
-      this._http.close();
-      this._app = null;
-      this._http = null;
+      io.close();
+      server.close();
       this._public = null;
     });
-
-    this._app.listen(this._port);
   }
 
   publish(path, remutableConsumer) {
@@ -101,11 +86,18 @@ class SocketIOServer extends Server {
     this._public[path] = remutableConsumer;
   }
 
-  acceptConnection(io) {
-    if(__DEV__) {
-      isSocket(io).should.be.true;
+  serveStore({ path }, res) {
+    if(this._public[path] === void 0) {
+      return res.status(404).json({ err: `Unknown path: ${path}` });
     }
-    this.acceptLink(new SocketIOLink(io, this._salt));
+    return res.status(200).type('application/json').send(this._public[path].toJSON());
+  }
+
+  acceptConnection(socket) {
+    if(__DEV__) {
+      isSocket(socket).should.be.true;
+    }
+    this.acceptLink(new SocketIOLink(socket, this._salt));
   }
 }
 
