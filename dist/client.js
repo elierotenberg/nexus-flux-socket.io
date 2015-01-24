@@ -90,6 +90,7 @@ var SocketIOClient = (function (Client) {
       }
       sockOpts.timeout = sockOpts.timeout || 5000;
       _this._io = IOClient(uri, reqOpts);
+      _this._salt = salt;
       _this._io.on(_this._salt, _this.receiveFromSocket);
       _this._requester = new Requester(uri, reqOpts);
       _get(Object.getPrototypeOf(SocketIOClient.prototype), "constructor", _this).call(_this, clientID);

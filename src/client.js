@@ -20,6 +20,7 @@ class SocketIOClient extends Client {
     }
     sockOpts.timeout = sockOpts.timeout || 5000;
     this._io = IOClient(uri, reqOpts);
+    this._salt = salt;
     this._io.on(this._salt, this.receiveFromSocket);
     this._requester = new Requester(uri, reqOpts);
     super(clientID);
