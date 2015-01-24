@@ -1,5 +1,5 @@
 import IOClient from 'socket.io-client';
-import { Client, Server } from 'nexus-flux';
+import { Client, Server, Remutable } from 'nexus-flux';
 import { Requester } from 'immutable-request';
 import { DEFAULT_SALT } from './common';
 
@@ -41,7 +41,13 @@ class SocketIOClient extends Client {
     if(hash !== null) {
       path = path + ((path.indexOf('?') === -1) ? '?' : '&') + 'h=' + hash;
     }
-    return this._requester.GET(path);
+    return this._requester.GET(path)
+    .then((js) => {
+      if(__DEV__) {
+        js.should.be.an.Object;
+      }
+      return Remutable.fromJS(js);
+    });
   }
 
   sendToServer(ev) {

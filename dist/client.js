@@ -62,6 +62,7 @@ var IOClient = _interopRequire(require("socket.io-client"));
 
 var Client = require("nexus-flux").Client;
 var Server = require("nexus-flux").Server;
+var Remutable = require("nexus-flux").Remutable;
 var Requester = require("immutable-request").Requester;
 var DEFAULT_SALT = require("./common").DEFAULT_SALT;
 
@@ -116,7 +117,12 @@ var SocketIOClient = (function (Client) {
         if (hash !== null) {
           path = path + (path.indexOf("?") === -1 ? "?" : "&") + "h=" + hash;
         }
-        return this._requester.GET(path);
+        return this._requester.GET(path).then(function (js) {
+          if (__DEV__) {
+            js.should.be.an.Object;
+          }
+          return Remutable.fromJS(js);
+        });
       },
       writable: true,
       enumerable: true,
