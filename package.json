@@ -1,6 +1,6 @@
 {
   "name": "nexus-flux-socket.io",
-  "version": "0.3.10",
+  "version": "0.3.11",
   "description": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
