@@ -76,7 +76,7 @@ class SocketIOServer extends Server {
       if(this._public[path] === void 0) {
         return res.status(404).json({ err: `Unknown path: ${path}` });
       }
-      return res.status(200).json(this._public[path].toJSON());
+      return res.status(200).type('application/json').send(this._public[path].toJSON());
     });
 
     nsp.addListener('connection', this.acceptConnection);
