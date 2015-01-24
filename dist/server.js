@@ -89,8 +89,8 @@ var SocketIOLink = (function (Link) {
       }
       _this._socket = socket;
       _this._salt = salt;
-      socket.on(_this._salt, _this.receiveFromSocket);
       _get(Object.getPrototypeOf(SocketIOLink.prototype), "constructor", _this).call(_this);
+      socket.on(_this._salt, _this.receiveFromSocket);
       socket.on("disconnect", _this.lifespan.release);
       _this.lifespan.onRelease(function () {
         socket.disconnect();

@@ -18,8 +18,8 @@ class SocketIOLink extends Link {
     }
     this._socket = socket;
     this._salt = salt;
-    socket.on(this._salt, this.receiveFromSocket);
     super();
+    socket.on(this._salt, this.receiveFromSocket);
     socket.on('disconnect', this.lifespan.release);
     this.lifespan.onRelease(() => {
       socket.disconnect();
