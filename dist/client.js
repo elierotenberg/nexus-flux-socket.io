@@ -89,11 +89,11 @@ var SocketIOClient = (function (Client) {
         reqOpts.should.be.an.Object;
       }
       sockOpts.timeout = sockOpts.timeout || 5000;
-      _get(Object.getPrototypeOf(SocketIOClient.prototype), "constructor", _this).call(_this, clientID);
       _this._io = IOClient(uri, reqOpts);
       _this._salt = salt;
-      _this._io.on(_this._salt, _this.receiveFromSocket);
       _this._requester = new Requester(uri, reqOpts);
+      _get(Object.getPrototypeOf(SocketIOClient.prototype), "constructor", _this).call(_this, clientID);
+      _this._io.on(_this._salt, _this.receiveFromSocket);
       _this.lifespan.onRelease(function () {
         _this._io.off(_this._salt, _this.receiveFromSocket);
         _this._io.disconnect(); // will call this._io.destroy(), ensuring we dont get reconnected
