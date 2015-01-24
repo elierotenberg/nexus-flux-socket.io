@@ -37,7 +37,7 @@ class SocketIOClient extends Client {
   fetch(path, hash = null) {
     if(__DEV__) {
       path.should.be.a.String;
-      (hash === null || _.isString(hash)).should.be.true;
+      (hash === null || _.isNumber(hash)).should.be.true;
     }
     if(hash !== null) {
       path = path + ((path.indexOf('?') === -1) ? '?' : '&') + 'h=' + hash;
