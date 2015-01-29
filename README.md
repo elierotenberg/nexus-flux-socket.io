@@ -1,6 +1,18 @@
 Nexus Flux socket.io Adapter
 ============================
 
+##### [Nexus Flux](https://github.com/elierotenberg/nexus-flux)
+
+Abstract Nexus Flux Diagram
+```
+    +-> Action.dispatch ---+--> Client.Events ---+--> Action.onDispatch -+
+    |    Fire & forget             Stream                 Callback       |
+Component logic         Adapter               Adapter               Global logic
+    |      Callback                Stream               Fire & forget    |
+    +-- Store.onUpdate  <--+--- Server.Events <--+------ Store.update ---+
+```
+
+
 This package implements the [socket.io adapter for Nexus Flux](https://github.com/elierotenberg/nexus-flux) to implement Flux over the Wire.
 
 Over the wire Nexus Flux Diagram using Websockets (with socket.io fallback)
