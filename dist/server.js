@@ -1,50 +1,12 @@
 "use strict";
 
-var _prototypeProperties = function (child, staticProps, instanceProps) {
-  if (staticProps) Object.defineProperties(child, staticProps);
-  if (instanceProps) Object.defineProperties(child.prototype, instanceProps);
-};
+var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
 
-var _get = function get(object, property, receiver) {
-  var desc = Object.getOwnPropertyDescriptor(object, property);
+var _prototypeProperties = function (child, staticProps, instanceProps) { if (staticProps) Object.defineProperties(child, staticProps); if (instanceProps) Object.defineProperties(child.prototype, instanceProps); };
 
-  if (desc === undefined) {
-    var parent = Object.getPrototypeOf(object);
+var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc && desc.writable) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-    if (parent === null) {
-      return undefined;
-    } else {
-      return get(parent, property, receiver);
-    }
-  } else if ("value" in desc && desc.writable) {
-    return desc.value;
-  } else {
-    var getter = desc.get;
-    if (getter === undefined) {
-      return undefined;
-    }
-    return getter.call(receiver);
-  }
-};
-
-var _inherits = function (subClass, superClass) {
-  if (typeof superClass !== "function" && superClass !== null) {
-    throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
-  }
-  subClass.prototype = Object.create(superClass && superClass.prototype, {
-    constructor: {
-      value: subClass,
-      enumerable: false,
-      writable: true,
-      configurable: true
-    }
-  });
-  if (superClass) subClass.__proto__ = superClass;
-};
-
-var _interopRequire = function (obj) {
-  return obj && (obj["default"] || obj);
-};
+var _inherits = function (subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
 
 require("6to5/polyfill");
 var _ = require("lodash");
@@ -58,9 +20,11 @@ if (__DEV__) {
   Promise.longStackTraces();
   Error.stackTraceLimit = Infinity;
 }
-var Client = require("nexus-flux").Client;
-var Server = require("nexus-flux").Server;
-var Remutable = require("nexus-flux").Remutable;
+var _nexusFlux = require("nexus-flux");
+
+var Client = _nexusFlux.Client;
+var Server = _nexusFlux.Server;
+var Remutable = _nexusFlux.Remutable;
 var Link = Server.Link;
 var express = _interopRequire(require("express"));
 
@@ -82,21 +46,19 @@ var SocketIOLink = (function (Link) {
   function SocketIOLink(socket) {
     var _this = this;
     var salt = arguments[1] === undefined ? DEFAULT_SALT : arguments[1];
-    return (function () {
-      if (__DEV__) {
-        isSocket(socket).should.be["true"];
-        salt.should.be.a.String;
-      }
-      _this._socket = socket;
-      _this._salt = salt;
-      _get(Object.getPrototypeOf(SocketIOLink.prototype), "constructor", _this).call(_this);
-      socket.on(_this._salt, _this.receiveFromSocket);
-      socket.on("disconnect", _this.lifespan.release);
-      _this.lifespan.onRelease(function () {
-        socket.disconnect();
-        _this._socket = null;
-      });
-    })();
+    if (__DEV__) {
+      isSocket(socket).should.be["true"];
+      salt.should.be.a.String;
+    }
+    this._socket = socket;
+    this._salt = salt;
+    _get(Object.getPrototypeOf(SocketIOLink.prototype), "constructor", this).call(this);
+    socket.on(this._salt, this.receiveFromSocket);
+    socket.on("disconnect", this.lifespan.release);
+    this.lifespan.onRelease(function () {
+      socket.disconnect();
+      _this._socket = null;
+    });
   }
 
   _inherits(SocketIOLink, Link);
@@ -110,7 +72,6 @@ var SocketIOLink = (function (Link) {
         this._socket.emit(this._salt, ev.toJSON());
       },
       writable: true,
-      enumerable: true,
       configurable: true
     },
     receiveFromSocket: {
@@ -125,7 +86,6 @@ var SocketIOLink = (function (Link) {
         this.receiveFromClient(ev);
       },
       writable: true,
-      enumerable: true,
       configurable: true
     }
   });
@@ -139,36 +99,34 @@ var SocketIOServer = (function (Server) {
   // sockOpts is passed to socket.io Server constructor
   // expressOpts is passed to express constructor
   function SocketIOServer(port) {
-    var _this2 = this;
+    var _this = this;
     var salt = arguments[1] === undefined ? DEFAULT_SALT : arguments[1];
     var sockOpts = arguments[2] === undefined ? {} : arguments[2];
     var expressOpts = arguments[3] === undefined ? {} : arguments[3];
-    return (function () {
-      if (__DEV__) {
-        port.should.be.a.Number.which.is.above(0);
-        salt.should.be.a.String;
-        sockOpts.should.be.an.Object;
-        expressOpts.should.be.an.Object;
-      }
-      sockOpts.pingTimeout = sockOpts.pingTimeout || 5000;
-      sockOpts.pingInterval = sockOpts.pingInterval || 5000;
-      _get(Object.getPrototypeOf(SocketIOServer.prototype), "constructor", _this2).call(_this2);
+    if (__DEV__) {
+      port.should.be.a.Number.which.is.above(0);
+      salt.should.be.a.String;
+      sockOpts.should.be.an.Object;
+      expressOpts.should.be.an.Object;
+    }
+    sockOpts.pingTimeout = sockOpts.pingTimeout || 5000;
+    sockOpts.pingInterval = sockOpts.pingInterval || 5000;
+    _get(Object.getPrototypeOf(SocketIOServer.prototype), "constructor", this).call(this);
 
-      _this2._salt = salt;
-      _this2._public = {};
-      var app = express(expressOpts).use(cors());
-      var server = http.Server(app);
-      var io = IOServer(server, sockOpts);
-      server.listen(port);
-      app.get("*", _this2.serveStore);
-      io.on("connection", _this2.acceptConnection);
+    this._salt = salt;
+    this._public = {};
+    var app = express(expressOpts).use(cors());
+    var server = http.Server(app);
+    var io = IOServer(server, sockOpts);
+    server.listen(port);
+    app.get("*", this.serveStore);
+    io.on("connection", this.acceptConnection);
 
-      _this2.lifespan.onRelease(function () {
-        io.close();
-        server.close();
-        _this2._public = null;
-      });
-    })();
+    this.lifespan.onRelease(function () {
+      io.close();
+      server.close();
+      _this._public = null;
+    });
   }
 
   _inherits(SocketIOServer, Server);
@@ -183,7 +141,6 @@ var SocketIOServer = (function (Server) {
         this._public[path] = remutableConsumer;
       },
       writable: true,
-      enumerable: true,
       configurable: true
     },
     serveStore: {
@@ -195,7 +152,6 @@ var SocketIOServer = (function (Server) {
         return res.status(200).type("application/json").send(this._public[path].toJSON());
       },
       writable: true,
-      enumerable: true,
       configurable: true
     },
     acceptConnection: {
@@ -206,7 +162,6 @@ var SocketIOServer = (function (Server) {
         this.acceptLink(new SocketIOLink(socket, this._salt));
       },
       writable: true,
-      enumerable: true,
       configurable: true
     }
   });
