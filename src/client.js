@@ -23,6 +23,11 @@ class SocketIOClient extends Client {
     this._salt = salt;
     this._requester = new Requester(uri, reqOpts);
     super(clientID);
+    _.bindAll(this, [
+      'fetch',
+      'sendToServer',
+      'receiveFromSocket',
+    ]);
     this._io.on(this._salt, this.receiveFromSocket);
     this.lifespan.onRelease(() => {
       this._io.off(this._salt, this.receiveFromSocket);

@@ -53,6 +53,7 @@ var SocketIOLink = (function (Link) {
     this._socket = socket;
     this._salt = salt;
     _get(Object.getPrototypeOf(SocketIOLink.prototype), "constructor", this).call(this);
+    _.bindAll(this, ["sendToClient", "receiveFromSocket"]);
     socket.on(this._salt, this.receiveFromSocket);
     socket.on("disconnect", this.lifespan.release);
     this.lifespan.onRelease(function () {
@@ -112,6 +113,7 @@ var SocketIOServer = (function (Server) {
     sockOpts.pingTimeout = sockOpts.pingTimeout || 5000;
     sockOpts.pingInterval = sockOpts.pingInterval || 5000;
     _get(Object.getPrototypeOf(SocketIOServer.prototype), "constructor", this).call(this);
+    _.bindAll(this, ["publish", "serveStore", "acceptConnection"]);
 
     this._salt = salt;
     this._public = {};

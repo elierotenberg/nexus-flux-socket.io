@@ -19,6 +19,7 @@ class SocketIOLink extends Link {
     this._socket = socket;
     this._salt = salt;
     super();
+    _.bindAll(this, ['sendToClient', 'receiveFromSocket']);
     socket.on(this._salt, this.receiveFromSocket);
     socket.on('disconnect', this.lifespan.release);
     this.lifespan.onRelease(() => {
@@ -61,6 +62,11 @@ class SocketIOServer extends Server {
     sockOpts.pingTimeout = sockOpts.pingTimeout || 5000;
     sockOpts.pingInterval = sockOpts.pingInterval || 5000;
     super();
+    _.bindAll(this, [
+      'publish',
+      'serveStore',
+      'acceptConnection',
+    ]);
 
     this._salt = salt;
     this._public = {};

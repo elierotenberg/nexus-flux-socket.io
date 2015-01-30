@@ -56,6 +56,7 @@ var SocketIOClient = (function (Client) {
     this._salt = salt;
     this._requester = new Requester(uri, reqOpts);
     _get(Object.getPrototypeOf(SocketIOClient.prototype), "constructor", this).call(this, clientID);
+    _.bindAll(this, ["fetch", "sendToServer", "receiveFromSocket"]);
     this._io.on(this._salt, this.receiveFromSocket);
     this.lifespan.onRelease(function () {
       _this._io.off(_this._salt, _this.receiveFromSocket);
