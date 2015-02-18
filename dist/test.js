@@ -1,5 +1,7 @@
 "use strict";
 
+var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+
 require("babel/polyfill");
 var _ = require("lodash");
 var should = require("should");
@@ -12,7 +14,6 @@ if (__DEV__) {
   Promise.longStackTraces();
   Error.stackTraceLimit = Infinity;
 }
-module.exports = {
-  // this is just a disambiguation salt; this is by no mean a cryptographic
-  // device. this does NOT prevent active eavesdropping over inscured channel.
-  DEFAULT_SALT: "__ZQ8Ykv8HQVtWWyznJZax9uJS" };
+var SocketIOServer = _interopRequire(require("./server"));
+
+var socketIOServer = new SocketIOServer(8080);

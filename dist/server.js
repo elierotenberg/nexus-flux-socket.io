@@ -8,7 +8,9 @@ var _get = function get(object, property, receiver) { var desc = Object.getOwnPr
 
 var _inherits = function (subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
 
-require("6to5/polyfill");
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
+require("babel/polyfill");
 var _ = require("lodash");
 var should = require("should");
 var Promise = (global || window).Promise = require("bluebird");
@@ -24,9 +26,10 @@ var _nexusFlux = require("nexus-flux");
 
 var Client = _nexusFlux.Client;
 var Server = _nexusFlux.Server;
-var Remutable = _nexusFlux.Remutable;
 var Link = Server.Link;
 var express = _interopRequire(require("express"));
+
+var createError = _interopRequire(require("http-errors"));
 
 var cors = _interopRequire(require("cors"));
 
@@ -46,6 +49,8 @@ var SocketIOLink = (function (Link) {
   function SocketIOLink(socket) {
     var _this = this;
     var salt = arguments[1] === undefined ? DEFAULT_SALT : arguments[1];
+    _classCallCheck(this, SocketIOLink);
+
     if (__DEV__) {
       isSocket(socket).should.be["true"];
       salt.should.be.a.String;
@@ -104,6 +109,8 @@ var SocketIOServer = (function (Server) {
     var salt = arguments[1] === undefined ? DEFAULT_SALT : arguments[1];
     var sockOpts = arguments[2] === undefined ? {} : arguments[2];
     var expressOpts = arguments[3] === undefined ? {} : arguments[3];
+    _classCallCheck(this, SocketIOServer);
+
     if (__DEV__) {
       port.should.be.a.Number.which.is.above(0);
       salt.should.be.a.String;
@@ -113,45 +120,50 @@ var SocketIOServer = (function (Server) {
     sockOpts.pingTimeout = sockOpts.pingTimeout || 5000;
     sockOpts.pingInterval = sockOpts.pingInterval || 5000;
     _get(Object.getPrototypeOf(SocketIOServer.prototype), "constructor", this).call(this);
-    _.bindAll(this, ["publish", "serveStore", "acceptConnection"]);
+    _.bindAll(this, ["serveStore", "acceptConnection"]);
 
     this._salt = salt;
-    this._public = {};
     var app = express(expressOpts).use(cors());
     var server = http.Server(app);
     var io = IOServer(server, sockOpts);
     server.listen(port);
-    app.get("*", this.serveStore);
+    app.get("*", function (req, res) {
+      return _this.serveStore(req).then(function (_ref) {
+        var status = _ref.status;
+        var json = _ref.json;
+        return res.status(status).json(json);
+      })["catch"](function (error) {
+        if (error.status !== void 0) {
+          res.status(error.status).json(error);
+        } else {
+          res.status(500).json(error);
+        }
+      });
+    });
     io.on("connection", this.acceptConnection);
 
     this.lifespan.onRelease(function () {
       io.close();
       server.close();
-      _this._public = null;
     });
   }
 
   _inherits(SocketIOServer, Server);
 
   _prototypeProperties(SocketIOServer, null, {
-    publish: {
-      value: function publish(path, remutableConsumer) {
-        if (__DEV__) {
-          path.should.be.a.String;
-          remutableConsumer.should.be.an.instanceOf(Remutable.Consumer);
-        }
-        this._public[path] = remutableConsumer;
-      },
-      writable: true,
-      configurable: true
-    },
     serveStore: {
-      value: function serveStore(_ref, res) {
+
+      /**
+       * @virtual
+       */
+      value: function serveStore(_ref) {
         var path = _ref.path;
-        if (this._public[path] === void 0) {
-          return res.status(404).json({ err: "Unknown path: " + path });
-        }
-        return res.status(200).type("application/json").send(this._public[path].toJSON());
+        return Promise["try"](function () {
+          if (__DEV__) {
+            path.should.be.a.String;
+          }
+          throw new createError(404, "Virtual method invocation, you have to define serveStore function.");
+        });
       },
       writable: true,
       configurable: true

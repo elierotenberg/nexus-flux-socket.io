@@ -8,7 +8,9 @@ var _get = function get(object, property, receiver) { var desc = Object.getOwnPr
 
 var _inherits = function (subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
 
-require("6to5/polyfill");
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
+require("babel/polyfill");
 var _ = require("lodash");
 var should = require("should");
 var Promise = (global || window).Promise = require("bluebird");
@@ -29,10 +31,6 @@ var Server = _nexusFlux.Server;
 var Remutable = _nexusFlux.Remutable;
 var Requester = require("immutable-request").Requester;
 var DEFAULT_SALT = require("./common").DEFAULT_SALT;
-
-
-var INT_MAX = 9007199254740992;
-
 var SocketIOClient = (function (Client) {
   // uri is the endpoint which the client will attempt to connect to
   // clientID is a unique client ID, which can be used (hashed as clientHash) by the server-side action dispatchers
@@ -41,13 +39,13 @@ var SocketIOClient = (function (Client) {
   // reqOpts is passed to Request constructor
   function SocketIOClient(uri) {
     var _this = this;
-    var clientID = arguments[1] === undefined ? _.uniqueId("Client" + _.random(1, INT_MAX - 1)) : arguments[1];
-    var salt = arguments[2] === undefined ? DEFAULT_SALT : arguments[2];
-    var sockOpts = arguments[3] === undefined ? {} : arguments[3];
-    var reqOpts = arguments[4] === undefined ? {} : arguments[4];
+    var salt = arguments[1] === undefined ? DEFAULT_SALT : arguments[1];
+    var sockOpts = arguments[2] === undefined ? {} : arguments[2];
+    var reqOpts = arguments[3] === undefined ? {} : arguments[3];
+    _classCallCheck(this, SocketIOClient);
+
     if (__DEV__) {
       uri.should.be.a.String;
-      clientID.should.be.a.String;
       sockOpts.should.be.an.Object;
       reqOpts.should.be.an.Object;
     }
@@ -55,7 +53,7 @@ var SocketIOClient = (function (Client) {
     this._io = IOClient(uri, reqOpts);
     this._salt = salt;
     this._requester = new Requester(uri, reqOpts);
-    _get(Object.getPrototypeOf(SocketIOClient.prototype), "constructor", this).call(this, clientID);
+    _get(Object.getPrototypeOf(SocketIOClient.prototype), "constructor", this).call(this);
     _.bindAll(this, ["fetch", "sendToServer", "receiveFromSocket"]);
     this._io.on(this._salt, this.receiveFromSocket);
     this.lifespan.onRelease(function () {

@@ -1,6 +1,7 @@
-import { Client, Server, Remutable } from 'nexus-flux';
+import { Client, Server } from 'nexus-flux';
 const { Link } = Server;
 import express from 'express';
+import createError from 'http-errors';
 import cors from 'cors';
 import http from 'http';
 import IOServer from 'socket.io';
@@ -63,40 +64,42 @@ class SocketIOServer extends Server {
     sockOpts.pingInterval = sockOpts.pingInterval || 5000;
     super();
     _.bindAll(this, [
-      'publish',
       'serveStore',
       'acceptConnection',
     ]);
 
     this._salt = salt;
-    this._public = {};
     const app = express(expressOpts).use(cors());
     const server = http.Server(app);
     const io = IOServer(server, sockOpts);
     server.listen(port);
-    app.get('*', this.serveStore);
+    app.get('*', (req, res) => this.serveStore(req)
+      .then(({status, json}) => res.status(status).json(json))
+      .catch((error) => {
+        if(error.status !== void 0){
+          res.status(error.status).json(error);
+        } else {
+          res.status(500).json(error);
+        }
+      }));
     io.on('connection', this.acceptConnection);
 
     this.lifespan.onRelease(() => {
       io.close();
       server.close();
-      this._public = null;
     });
   }
 
-  publish(path, remutableConsumer) {
-    if(__DEV__) {
-      path.should.be.a.String;
-      remutableConsumer.should.be.an.instanceOf(Remutable.Consumer);
-    }
-    this._public[path] = remutableConsumer;
-  }
-
-  serveStore({ path }, res) {
-    if(this._public[path] === void 0) {
-      return res.status(404).json({ err: `Unknown path: ${path}` });
-    }
-    return res.status(200).type('application/json').send(this._public[path].toJSON());
+  /**
+   * @virtual
+   */
+  serveStore({ path }) {
+    return Promise.try(() => {
+      if(__DEV__) {
+        path.should.be.a.String;
+      }
+      throw new createError(404, 'Virtual method invocation, you have to define serveStore function.');
+    });
   }
 
   acceptConnection(socket) {
