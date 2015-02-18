@@ -33,7 +33,6 @@ var Requester = require("immutable-request").Requester;
 var DEFAULT_SALT = require("./common").DEFAULT_SALT;
 var SocketIOClient = (function (Client) {
   // uri is the endpoint which the client will attempt to connect to
-  // clientID is a unique client ID, which can be used (hashed as clientHash) by the server-side action dispatchers
   // salt is a disambiguation salt to allow multiplexing
   // sockOpts is passed to socket.io Client constructor
   // reqOpts is passed to Request constructor
@@ -54,10 +53,12 @@ var SocketIOClient = (function (Client) {
     this._salt = salt;
     this._requester = new Requester(uri, reqOpts);
     _get(Object.getPrototypeOf(SocketIOClient.prototype), "constructor", this).call(this);
-    _.bindAll(this, ["fetch", "sendToServer", "receiveFromSocket"]);
-    this._io.on(this._salt, this.receiveFromSocket);
+    var receiveFromSocket = function (json) {
+      return _this.receiveFromSocket(json);
+    };
+    this._io.on(this._salt, receiveFromSocket);
     this.lifespan.onRelease(function () {
-      _this._io.off(_this._salt, _this.receiveFromSocket);
+      _this._io.off(_this._salt, receiveFromSocket);
       _this._io.disconnect(); // will call this._io.destroy(), ensuring we dont get reconnected
       _this._io = null;
       _this._requester.cancelAll(new Error("Client lifespan released"));

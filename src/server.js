@@ -48,6 +48,9 @@ class SocketIOLink extends Link {
   }
 }
 
+/**
+ * @abstract
+ */
 class SocketIOServer extends Server {
   // port is the port to listen to
   // salt is a disambiguation salt to allow multiplexing
@@ -59,14 +62,12 @@ class SocketIOServer extends Server {
       salt.should.be.a.String;
       sockOpts.should.be.an.Object;
       expressOpts.should.be.an.Object;
+      this.constructor.should.not.be.exactly(SocketIOServer); // ensure abstract
+      this.serveStore.should.not.be.exactly(SocketIOServer.prototype.serveStore); // ensure virtual
     }
     sockOpts.pingTimeout = sockOpts.pingTimeout || 5000;
     sockOpts.pingInterval = sockOpts.pingInterval || 5000;
     super();
-    _.bindAll(this, [
-      'serveStore',
-      'acceptConnection',
-    ]);
 
     this._salt = salt;
     const app = express(expressOpts).use(cors());
@@ -74,15 +75,16 @@ class SocketIOServer extends Server {
     const io = IOServer(server, sockOpts);
     server.listen(port);
     app.get('*', (req, res) => this.serveStore(req)
-      .then(({status, json}) => res.status(status).json(json))
+      .then((json) => res.type('json').send(json))
       .catch((error) => {
-        if(error.status !== void 0){
+        if(error.status !== void 0) {
           res.status(error.status).json(error);
-        } else {
+        }
+        else {
           res.status(500).json(error);
         }
       }));
-    io.on('connection', this.acceptConnection);
+    io.on('connection', (socket) => this.acceptConnection(socket));
 
     this.lifespan.onRelease(() => {
       io.close();

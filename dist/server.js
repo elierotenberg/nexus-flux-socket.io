@@ -99,6 +99,9 @@ var SocketIOLink = (function (Link) {
   return SocketIOLink;
 })(Link);
 
+/**
+ * @abstract
+ */
 var SocketIOServer = (function (Server) {
   // port is the port to listen to
   // salt is a disambiguation salt to allow multiplexing
@@ -116,11 +119,12 @@ var SocketIOServer = (function (Server) {
       salt.should.be.a.String;
       sockOpts.should.be.an.Object;
       expressOpts.should.be.an.Object;
+      this.constructor.should.not.be.exactly(SocketIOServer); // ensure abstract
+      this.serveStore.should.not.be.exactly(SocketIOServer.prototype.serveStore); // ensure virtual
     }
     sockOpts.pingTimeout = sockOpts.pingTimeout || 5000;
     sockOpts.pingInterval = sockOpts.pingInterval || 5000;
     _get(Object.getPrototypeOf(SocketIOServer.prototype), "constructor", this).call(this);
-    _.bindAll(this, ["serveStore", "acceptConnection"]);
 
     this._salt = salt;
     var app = express(expressOpts).use(cors());
@@ -128,10 +132,8 @@ var SocketIOServer = (function (Server) {
     var io = IOServer(server, sockOpts);
     server.listen(port);
     app.get("*", function (req, res) {
-      return _this.serveStore(req).then(function (_ref) {
-        var status = _ref.status;
-        var json = _ref.json;
-        return res.status(status).json(json);
+      return _this.serveStore(req).then(function (json) {
+        return res.type("json").send(json);
       })["catch"](function (error) {
         if (error.status !== void 0) {
           res.status(error.status).json(error);
@@ -140,7 +142,9 @@ var SocketIOServer = (function (Server) {
         }
       });
     });
-    io.on("connection", this.acceptConnection);
+    io.on("connection", function (socket) {
+      return _this.acceptConnection(socket);
+    });
 
     this.lifespan.onRelease(function () {
       io.close();
