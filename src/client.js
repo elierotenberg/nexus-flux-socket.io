@@ -15,20 +15,31 @@ class SocketIOClient extends Client {
       reqOpts.should.be.an.Object;
     }
     sockOpts.timeout = sockOpts.timeout || 5000;
-    this._io = IOClient(uri, reqOpts);
+    this._uri = uri;
+    this._sockOpts = sockOpts;
     this._salt = salt;
     this._requester = new Requester(uri, reqOpts);
+    this._ioClient = null;
     super();
-    const receiveFromSocket = (json) => this.receiveFromSocket(json);
-    this._io.on(this._salt, receiveFromSocket);
     this.lifespan.onRelease(() => {
-      this._io.off(this._salt, receiveFromSocket);
-      this._io.disconnect(); // will call this._io.destroy(), ensuring we dont get reconnected
-      this._io = null;
       this._requester.cancelAll(new Error('Client lifespan released'));
       this._requester.reset();
       this._requester = null;
     });
+  }
+
+  get _io() { // lazily instanciate an actual socket; won't connect unless we need it.
+    if(this._ioClient === null) {
+      this._ioClient = IOClient(this._uri, this._sockOpts);
+      const receiveFromSocket = (json) => this.receiveFromSocket(json);
+      this._ioClient.on(this._salt, receiveFromSocket);
+      this.lifespan.onRelease(() => {
+        this._ioClient.off(this._salt, receiveFromSocket);
+        this._ioClient.disconnect();
+        this._ioClient = null;
+      });
+    }
+    return this._ioClient;
   }
 
   fetch(path, hash = null) {

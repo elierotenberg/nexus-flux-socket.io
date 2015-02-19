@@ -49,18 +49,13 @@ var SocketIOClient = (function (Client) {
       reqOpts.should.be.an.Object;
     }
     sockOpts.timeout = sockOpts.timeout || 5000;
-    this._io = IOClient(uri, reqOpts);
+    this._uri = uri;
+    this._sockOpts = sockOpts;
     this._salt = salt;
     this._requester = new Requester(uri, reqOpts);
+    this._ioClient = null;
     _get(Object.getPrototypeOf(SocketIOClient.prototype), "constructor", this).call(this);
-    var receiveFromSocket = function (json) {
-      return _this.receiveFromSocket(json);
-    };
-    this._io.on(this._salt, receiveFromSocket);
     this.lifespan.onRelease(function () {
-      _this._io.off(_this._salt, receiveFromSocket);
-      _this._io.disconnect(); // will call this._io.destroy(), ensuring we dont get reconnected
-      _this._io = null;
       _this._requester.cancelAll(new Error("Client lifespan released"));
       _this._requester.reset();
       _this._requester = null;
@@ -70,6 +65,28 @@ var SocketIOClient = (function (Client) {
   _inherits(SocketIOClient, Client);
 
   _prototypeProperties(SocketIOClient, null, {
+    _io: {
+      get: function () {
+        var _this = this;
+        // lazily instanciate an actual socket; won't connect unless we need it.
+        if (this._ioClient === null) {
+          (function () {
+            _this._ioClient = IOClient(_this._uri, _this._sockOpts);
+            var receiveFromSocket = function (json) {
+              return _this.receiveFromSocket(json);
+            };
+            _this._ioClient.on(_this._salt, receiveFromSocket);
+            _this.lifespan.onRelease(function () {
+              _this._ioClient.off(_this._salt, receiveFromSocket);
+              _this._ioClient.disconnect();
+              _this._ioClient = null;
+            });
+          })();
+        }
+        return this._ioClient;
+      },
+      configurable: true
+    },
     fetch: {
       value: function fetch(path) {
         var hash = arguments[1] === undefined ? null : arguments[1];
