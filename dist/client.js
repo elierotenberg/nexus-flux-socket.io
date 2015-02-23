@@ -22,6 +22,7 @@ if (__DEV__) {
   Promise.longStackTraces();
   Error.stackTraceLimit = Infinity;
 }
+
 var IOClient = _interopRequire(require("socket.io-client"));
 
 var _nexusFlux = require("nexus-flux");
@@ -29,18 +30,24 @@ var _nexusFlux = require("nexus-flux");
 var Client = _nexusFlux.Client;
 var Server = _nexusFlux.Server;
 var Remutable = _nexusFlux.Remutable;
+
 var Requester = require("immutable-request").Requester;
+
 var DEFAULT_SALT = require("./common").DEFAULT_SALT;
+
 var SocketIOClient = (function (Client) {
   // uri is the endpoint which the client will attempt to connect to
   // salt is a disambiguation salt to allow multiplexing
   // sockOpts is passed to socket.io Client constructor
   // reqOpts is passed to Request constructor
+
   function SocketIOClient(uri) {
     var _this = this;
+
     var salt = arguments[1] === undefined ? DEFAULT_SALT : arguments[1];
     var sockOpts = arguments[2] === undefined ? {} : arguments[2];
     var reqOpts = arguments[3] === undefined ? {} : arguments[3];
+
     _classCallCheck(this, SocketIOClient);
 
     if (__DEV__) {
@@ -68,6 +75,7 @@ var SocketIOClient = (function (Client) {
     _io: {
       get: function () {
         var _this = this;
+
         // lazily instanciate an actual socket; won't connect unless we need it.
         if (this._ioClient === null) {
           (function () {
@@ -90,6 +98,7 @@ var SocketIOClient = (function (Client) {
     fetch: {
       value: function fetch(path) {
         var hash = arguments[1] === undefined ? null : arguments[1];
+
         if (__DEV__) {
           path.should.be.a.String;
           (hash === null || _.isNumber(hash)).should.be["true"];

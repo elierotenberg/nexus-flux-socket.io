@@ -24,7 +24,12 @@ class SocketIOLink extends Link {
     socket.on(this._salt, this.receiveFromSocket);
     socket.on('disconnect', this.lifespan.release);
     this.lifespan.onRelease(() => {
-      socket.disconnect();
+      try {
+        socket.disconnect();
+      }
+      catch(err) {
+        console.warn(err);
+      }
       this._socket = null;
     });
   }
@@ -88,7 +93,6 @@ class SocketIOServer extends Server {
 
     this.lifespan.onRelease(() => {
       io.close();
-      server.close();
     });
   }
 

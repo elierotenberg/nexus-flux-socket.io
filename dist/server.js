@@ -22,11 +22,13 @@ if (__DEV__) {
   Promise.longStackTraces();
   Error.stackTraceLimit = Infinity;
 }
+
 var _nexusFlux = require("nexus-flux");
 
 var Client = _nexusFlux.Client;
 var Server = _nexusFlux.Server;
 var Link = Server.Link;
+
 var express = _interopRequire(require("express"));
 
 var createError = _interopRequire(require("http-errors"));
@@ -39,7 +41,6 @@ var IOServer = _interopRequire(require("socket.io"));
 
 var DEFAULT_SALT = require("./common").DEFAULT_SALT;
 
-
 function isSocket(obj) {
   // ducktype-check
   return _.isObject(obj) && _.isFunction(obj.emit) && _.isFunction(obj.addListener) && _.isFunction(obj.removeListener);
@@ -48,7 +49,9 @@ function isSocket(obj) {
 var SocketIOLink = (function (Link) {
   function SocketIOLink(socket) {
     var _this = this;
+
     var salt = arguments[1] === undefined ? DEFAULT_SALT : arguments[1];
+
     _classCallCheck(this, SocketIOLink);
 
     if (__DEV__) {
@@ -62,7 +65,11 @@ var SocketIOLink = (function (Link) {
     socket.on(this._salt, this.receiveFromSocket);
     socket.on("disconnect", this.lifespan.release);
     this.lifespan.onRelease(function () {
-      socket.disconnect();
+      try {
+        socket.disconnect();
+      } catch (err) {
+        console.warn(err);
+      }
       _this._socket = null;
     });
   }
@@ -102,16 +109,20 @@ var SocketIOLink = (function (Link) {
 /**
  * @abstract
  */
+
 var SocketIOServer = (function (Server) {
   // port is the port to listen to
   // salt is a disambiguation salt to allow multiplexing
   // sockOpts is passed to socket.io Server constructor
   // expressOpts is passed to express constructor
+
   function SocketIOServer(port) {
     var _this = this;
+
     var salt = arguments[1] === undefined ? DEFAULT_SALT : arguments[1];
     var sockOpts = arguments[2] === undefined ? {} : arguments[2];
     var expressOpts = arguments[3] === undefined ? {} : arguments[3];
+
     _classCallCheck(this, SocketIOServer);
 
     if (__DEV__) {
@@ -148,7 +159,6 @@ var SocketIOServer = (function (Server) {
 
     this.lifespan.onRelease(function () {
       io.close();
-      server.close();
     });
   }
 
@@ -160,8 +170,10 @@ var SocketIOServer = (function (Server) {
       /**
        * @virtual
        */
+
       value: function serveStore(_ref) {
         var path = _ref.path;
+
         return Promise["try"](function () {
           if (__DEV__) {
             path.should.be.a.String;

@@ -22,10 +22,12 @@ if (__DEV__) {
   Promise.longStackTraces();
   Error.stackTraceLimit = Infinity;
 }
+
 var _nexusFlux = require("nexus-flux");
 
 var Lifespan = _nexusFlux.Lifespan;
 var Remutable = _nexusFlux.Remutable;
+
 var Client = _interopRequire(require("../client"));
 
 var Server = _interopRequire(require("../server"));
@@ -52,6 +54,7 @@ _.defer(function () {
       serveStore: {
         value: function serveStore(_ref) {
           var path = _ref.path;
+
           return Promise["try"](function () {
             if (!_.isString(path)) {
               throw createError(400, "Path should be a string.");
@@ -89,6 +92,7 @@ _.defer(function () {
       var name = _ref.name;
       var description = _ref.description;
       var ownerKey = _ref.ownerKey;
+
       var item = { name: name, description: description, ownerHash: hash(ownerKey) };
       if (todoList.get(name) !== void 0) {
         return;
@@ -98,11 +102,13 @@ _.defer(function () {
     "/removeItem": function (_ref) {
       var name = _ref.name;
       var ownerKey = _ref.ownerKey;
+
       var item = todoList.get(name);
       if (item === void 0) {
         return;
       }
       var ownerHash = item.ownerHash;
+
       if (hash(ownerKey) !== ownerHash) {
         return;
       }
@@ -112,6 +118,7 @@ _.defer(function () {
   server.on("action", function (_ref) {
     var path = _ref.path;
     var params = _ref.params;
+
     if (actions[path] !== void 0) {
       actions[path](params);
     }
