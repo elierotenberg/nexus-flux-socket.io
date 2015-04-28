@@ -1,41 +1,43 @@
-"use strict";
+'use strict';
 
-var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+var _interopRequireDefault = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
 
-var _prototypeProperties = function (child, staticProps, instanceProps) { if (staticProps) Object.defineProperties(child, staticProps); if (instanceProps) Object.defineProperties(child.prototype, instanceProps); };
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
 
-var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc && desc.writable) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _inherits = function (subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
+var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+var _inherits = function (subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
 
-require("babel/polyfill");
-var _ = require("lodash");
-var should = require("should");
-var Promise = (global || window).Promise = require("bluebird");
-var __DEV__ = process.env.NODE_ENV !== "production";
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+
+var _IOClient = require('socket.io-client');
+
+var _IOClient2 = _interopRequireDefault(_IOClient);
+
+var _Client$Server$Remutable = require('nexus-flux');
+
+var _Requester = require('immutable-request');
+
+var _DEFAULT_SALT = require('./common');
+
+require('babel/polyfill');
+var _ = require('lodash');
+var should = require('should');
+var Promise = (global || window).Promise = require('bluebird');
+var __DEV__ = process.env.NODE_ENV !== 'production';
 var __PROD__ = !__DEV__;
-var __BROWSER__ = typeof window === "object";
+var __BROWSER__ = typeof window === 'object';
 var __NODE__ = !__BROWSER__;
 if (__DEV__) {
   Promise.longStackTraces();
   Error.stackTraceLimit = Infinity;
 }
 
-var IOClient = _interopRequire(require("socket.io-client"));
-
-var _nexusFlux = require("nexus-flux");
-
-var Client = _nexusFlux.Client;
-var Server = _nexusFlux.Server;
-var Remutable = _nexusFlux.Remutable;
-
-var Requester = require("immutable-request").Requester;
-
-var DEFAULT_SALT = require("./common").DEFAULT_SALT;
-
-var SocketIOClient = (function (Client) {
+var SocketIOClient = (function (_Client) {
   // uri is the endpoint which the client will attempt to connect to
   // salt is a disambiguation salt to allow multiplexing
   // sockOpts is passed to socket.io Client constructor
@@ -44,7 +46,7 @@ var SocketIOClient = (function (Client) {
   function SocketIOClient(uri) {
     var _this = this;
 
-    var salt = arguments[1] === undefined ? DEFAULT_SALT : arguments[1];
+    var salt = arguments[1] === undefined ? _DEFAULT_SALT.DEFAULT_SALT : arguments[1];
     var sockOpts = arguments[2] === undefined ? {} : arguments[2];
     var reqOpts = arguments[3] === undefined ? {} : arguments[3];
 
@@ -56,93 +58,87 @@ var SocketIOClient = (function (Client) {
       reqOpts.should.be.an.Object;
     }
     sockOpts.timeout = sockOpts.timeout || 5000;
+    _get(Object.getPrototypeOf(SocketIOClient.prototype), 'constructor', this).call(this);
     this._uri = uri;
     this._sockOpts = sockOpts;
     this._salt = salt;
-    this._requester = new Requester(uri, reqOpts);
+    this._requester = new _Requester.Requester(uri, reqOpts);
     this._ioClient = null;
-    _get(Object.getPrototypeOf(SocketIOClient.prototype), "constructor", this).call(this);
     this.lifespan.onRelease(function () {
-      _this._requester.cancelAll(new Error("Client lifespan released"));
+      _this._requester.cancelAll(new Error('Client lifespan released'));
       _this._requester.reset();
       _this._requester = null;
     });
   }
 
-  _inherits(SocketIOClient, Client);
+  _inherits(SocketIOClient, _Client);
 
-  _prototypeProperties(SocketIOClient, null, {
-    _io: {
-      get: function () {
-        var _this = this;
+  _createClass(SocketIOClient, [{
+    key: '_io',
+    get: function () {
+      var _this2 = this;
 
-        // lazily instanciate an actual socket; won't connect unless we need it.
-        if (this._ioClient === null) {
-          (function () {
-            _this._ioClient = IOClient(_this._uri, _this._sockOpts);
-            var receiveFromSocket = function (json) {
-              return _this.receiveFromSocket(json);
-            };
-            _this._ioClient.on(_this._salt, receiveFromSocket);
-            _this.lifespan.onRelease(function () {
-              _this._ioClient.off(_this._salt, receiveFromSocket);
-              _this._ioClient.disconnect();
-              _this._ioClient = null;
-            });
-          })();
-        }
-        return this._ioClient;
-      },
-      configurable: true
-    },
-    fetch: {
-      value: function fetch(path) {
-        var hash = arguments[1] === undefined ? null : arguments[1];
-
-        if (__DEV__) {
-          path.should.be.a.String;
-          (hash === null || _.isNumber(hash)).should.be["true"];
-        }
-        if (hash !== null) {
-          path = path + (path.indexOf("?") === -1 ? "?" : "&") + "h=" + hash;
-        }
-        return this._requester.GET(path).then(function (js) {
-          if (__DEV__) {
-            js.should.be.an.Object;
-          }
-          return Remutable.fromJS(js);
-        });
-      },
-      writable: true,
-      configurable: true
-    },
-    sendToServer: {
-      value: function sendToServer(ev) {
-        if (__DEV__) {
-          ev.should.be.an.instanceOf(Client.Event);
-        }
-        this._io.emit(this._salt, ev.toJSON());
-      },
-      writable: true,
-      configurable: true
-    },
-    receiveFromSocket: {
-      value: function receiveFromSocket(json) {
-        if (__DEV__) {
-          json.should.be.a.String;
-        }
-        var ev = Server.Event.fromJSON(json);
-        if (__DEV__) {
-          ev.should.be.an.instanceOf(Server.Event);
-        }
-        this.receiveFromServer(ev);
-      },
-      writable: true,
-      configurable: true
+      // lazily instanciate an actual socket; won't connect unless we need it.
+      if (this._ioClient === null) {
+        (function () {
+          _this2._ioClient = new _IOClient2['default'](_this2._uri, _this2._sockOpts);
+          var receiveFromSocket = function receiveFromSocket(json) {
+            return _this2.receiveFromSocket(json);
+          };
+          _this2._ioClient.on(_this2._salt, receiveFromSocket);
+          _this2.lifespan.onRelease(function () {
+            _this2._ioClient.off(_this2._salt, receiveFromSocket);
+            _this2._ioClient.disconnect();
+            _this2._ioClient = null;
+          });
+        })();
+      }
+      return this._ioClient;
     }
-  });
+  }, {
+    key: 'fetch',
+    value: function fetch(path) {
+      var hash = arguments[1] === undefined ? null : arguments[1];
+
+      if (__DEV__) {
+        path.should.be.a.String;
+        (hash === null || _.isNumber(hash)).should.be['true'];
+      }
+      if (hash !== null) {
+        path = path + (path.indexOf('?') === -1 ? '?' : '&') + 'h=' + hash;
+      }
+      return this._requester.GET(path) // eslint-disable-line new-cap
+      .then(function (js) {
+        if (__DEV__) {
+          js.should.be.an.Object;
+        }
+        return _Client$Server$Remutable.Remutable.fromJS(js);
+      });
+    }
+  }, {
+    key: 'sendToServer',
+    value: function sendToServer(ev) {
+      if (__DEV__) {
+        ev.should.be.an.instanceOf(_Client$Server$Remutable.Client.Event);
+      }
+      this._io.emit(this._salt, ev.toJSON());
+    }
+  }, {
+    key: 'receiveFromSocket',
+    value: function receiveFromSocket(json) {
+      if (__DEV__) {
+        json.should.be.a.String;
+      }
+      var ev = _Client$Server$Remutable.Server.Event.fromJSON(json);
+      if (__DEV__) {
+        ev.should.be.an.instanceOf(_Client$Server$Remutable.Server.Event);
+      }
+      this.receiveFromServer(ev);
+    }
+  }]);
 
   return SocketIOClient;
-})(Client);
+})(_Client$Server$Remutable.Client);
 
-module.exports = SocketIOClient;
+exports['default'] = SocketIOClient;
+module.exports = exports['default'];

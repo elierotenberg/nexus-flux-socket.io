@@ -15,12 +15,12 @@ class SocketIOClient extends Client {
       reqOpts.should.be.an.Object;
     }
     sockOpts.timeout = sockOpts.timeout || 5000;
+    super();
     this._uri = uri;
     this._sockOpts = sockOpts;
     this._salt = salt;
     this._requester = new Requester(uri, reqOpts);
     this._ioClient = null;
-    super();
     this.lifespan.onRelease(() => {
       this._requester.cancelAll(new Error('Client lifespan released'));
       this._requester.reset();
@@ -30,7 +30,7 @@ class SocketIOClient extends Client {
 
   get _io() { // lazily instanciate an actual socket; won't connect unless we need it.
     if(this._ioClient === null) {
-      this._ioClient = IOClient(this._uri, this._sockOpts);
+      this._ioClient = new IOClient(this._uri, this._sockOpts);
       const receiveFromSocket = (json) => this.receiveFromSocket(json);
       this._ioClient.on(this._salt, receiveFromSocket);
       this.lifespan.onRelease(() => {
@@ -50,7 +50,7 @@ class SocketIOClient extends Client {
     if(hash !== null) {
       path = path + ((path.indexOf('?') === -1) ? '?' : '&') + 'h=' + hash;
     }
-    return this._requester.GET(path)
+    return this._requester.GET(path) // eslint-disable-line new-cap
     .then((js) => {
       if(__DEV__) {
         js.should.be.an.Object;
