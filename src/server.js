@@ -13,13 +13,13 @@ function isSocket(obj) { // ducktype-check
 
 class SocketIOLink extends Link {
   constructor(socket, salt = DEFAULT_SALT) {
+    super();
     if(__DEV__) {
       isSocket(socket).should.be.true;
       salt.should.be.a.String;
     }
     this._socket = socket;
     this._salt = salt;
-    super();
     _.bindAll(this, ['sendToClient', 'receiveFromSocket']);
     socket.on(this._salt, this.receiveFromSocket);
     socket.on('disconnect', this.lifespan.release);
@@ -62,6 +62,7 @@ class SocketIOServer extends Server {
   // sockOpts is passed to socket.io Server constructor
   // expressOpts is passed to express constructor
   constructor(port, salt = DEFAULT_SALT, sockOpts = {}, expressOpts = {}) {
+    super();
     if(__DEV__) {
       port.should.be.a.Number.which.is.above(0);
       salt.should.be.a.String;
@@ -72,12 +73,11 @@ class SocketIOServer extends Server {
     }
     sockOpts.pingTimeout = sockOpts.pingTimeout || 5000;
     sockOpts.pingInterval = sockOpts.pingInterval || 5000;
-    super();
 
     this._salt = salt;
     const app = express(expressOpts).use(cors());
-    const server = http.Server(app);
-    const io = IOServer(server, sockOpts);
+    const server = http.Server(app); // eslint-disable-line new-cap
+    const io = new IOServer(server, sockOpts);
     server.listen(port);
     app.get('*', (req, res) => this.serveStore(req)
       .then((json) => res.type('json').send(json))
@@ -104,7 +104,7 @@ class SocketIOServer extends Server {
       if(__DEV__) {
         path.should.be.a.String;
       }
-      throw new createError(404, 'Virtual method invocation, you have to define serveStore function.');
+      throw createError(404, 'Virtual method invocation, you have to define serveStore function.');
     });
   }
 
