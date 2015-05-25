@@ -1,28 +1,30 @@
 'use strict';
 
-var _interopRequireDefault = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
+var _inherits = require('babel-runtime/helpers/inherits')['default'];
 
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
+var _get = require('babel-runtime/helpers/get')['default'];
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createClass = require('babel-runtime/helpers/create-class')['default'];
 
-var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+var _classCallCheck = require('babel-runtime/helpers/class-call-check')['default'];
 
-var _inherits = function (subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
+var _Object$defineProperty = require('babel-runtime/core-js/object/define-property')['default'];
 
-Object.defineProperty(exports, '__esModule', {
+var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
+
+_Object$defineProperty(exports, '__esModule', {
   value: true
 });
 
-var _Client$Server = require('nexus-flux');
+var _nexusFlux = require('nexus-flux');
 
 var _express = require('express');
 
 var _express2 = _interopRequireDefault(_express);
 
-var _createError = require('http-errors');
+var _httpErrors = require('http-errors');
 
-var _createError2 = _interopRequireDefault(_createError);
+var _httpErrors2 = _interopRequireDefault(_httpErrors);
 
 var _cors = require('cors');
 
@@ -32,13 +34,12 @@ var _http = require('http');
 
 var _http2 = _interopRequireDefault(_http);
 
-var _IOServer = require('socket.io');
+var _socketIo = require('socket.io');
 
-var _IOServer2 = _interopRequireDefault(_IOServer);
+var _socketIo2 = _interopRequireDefault(_socketIo);
 
-var _DEFAULT_SALT = require('./common');
+var _common = require('./common');
 
-require('babel/polyfill');
 var _ = require('lodash');
 var should = require('should');
 var Promise = (global || window).Promise = require('bluebird');
@@ -50,7 +51,7 @@ if (__DEV__) {
   Promise.longStackTraces();
   Error.stackTraceLimit = Infinity;
 }
-var Link = _Client$Server.Server.Link;
+var Link = _nexusFlux.Server.Link;
 
 function isSocket(obj) {
   // ducktype-check
@@ -61,7 +62,7 @@ var SocketIOLink = (function (_Link) {
   function SocketIOLink(socket) {
     var _this = this;
 
-    var salt = arguments[1] === undefined ? _DEFAULT_SALT.DEFAULT_SALT : arguments[1];
+    var salt = arguments[1] === undefined ? _common.DEFAULT_SALT : arguments[1];
 
     _classCallCheck(this, SocketIOLink);
 
@@ -91,7 +92,7 @@ var SocketIOLink = (function (_Link) {
     key: 'sendToClient',
     value: function sendToClient(ev) {
       if (__DEV__) {
-        ev.should.be.an.instanceOf(_Client$Server.Server.Event);
+        ev.should.be.an.instanceOf(_nexusFlux.Server.Event);
       }
       this._socket.emit(this._salt, ev.toJSON());
     }
@@ -101,9 +102,9 @@ var SocketIOLink = (function (_Link) {
       if (__DEV__) {
         json.should.be.a.String;
       }
-      var ev = _Client$Server.Client.Event.fromJSON(json);
+      var ev = _nexusFlux.Client.Event.fromJSON(json);
       if (__DEV__) {
-        ev.should.be.an.instanceOf(_Client$Server.Client.Event);
+        ev.should.be.an.instanceOf(_nexusFlux.Client.Event);
       }
       this.receiveFromClient(ev);
     }
@@ -123,9 +124,10 @@ var SocketIOServer = (function (_Server) {
   // expressOpts is passed to express constructor
 
   function SocketIOServer(port) {
+    var salt = arguments[1] === undefined ? _common.DEFAULT_SALT : arguments[1];
+
     var _this2 = this;
 
-    var salt = arguments[1] === undefined ? _DEFAULT_SALT.DEFAULT_SALT : arguments[1];
     var sockOpts = arguments[2] === undefined ? {} : arguments[2];
     var expressOpts = arguments[3] === undefined ? {} : arguments[3];
 
@@ -144,9 +146,9 @@ var SocketIOServer = (function (_Server) {
     sockOpts.pingInterval = sockOpts.pingInterval || 5000;
 
     this._salt = salt;
-    var app = _express2['default'](expressOpts).use(_cors2['default']());
+    var app = (0, _express2['default'])(expressOpts).use((0, _cors2['default'])());
     var server = _http2['default'].Server(app); // eslint-disable-line new-cap
-    var io = new _IOServer2['default'](server, sockOpts);
+    var io = new _socketIo2['default'](server, sockOpts);
     server.listen(port);
     app.get('*', function (req, res) {
       return _this2.serveStore(req).then(function (json) {
@@ -183,7 +185,7 @@ var SocketIOServer = (function (_Server) {
         if (__DEV__) {
           path.should.be.a.String;
         }
-        throw _createError2['default'](404, 'Virtual method invocation, you have to define serveStore function.');
+        throw (0, _httpErrors2['default'])(404, 'Virtual method invocation, you have to define serveStore function.');
       });
     }
   }, {
@@ -197,7 +199,7 @@ var SocketIOServer = (function (_Server) {
   }]);
 
   return SocketIOServer;
-})(_Client$Server.Server);
+})(_nexusFlux.Server);
 
 exports['default'] = SocketIOServer;
 module.exports = exports['default'];
