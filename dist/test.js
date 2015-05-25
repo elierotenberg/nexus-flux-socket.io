@@ -1,34 +1,33 @@
 'use strict';
 
-var _interopRequireDefault = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
+var _inherits = require('babel-runtime/helpers/inherits')['default'];
 
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
+var _get = require('babel-runtime/helpers/get')['default'];
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createClass = require('babel-runtime/helpers/create-class')['default'];
 
-var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+var _classCallCheck = require('babel-runtime/helpers/class-call-check')['default'];
 
-var _inherits = function (subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
+var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
 
-var _Lifespan$Remutable = require('nexus-flux');
+var _nexusFlux = require('nexus-flux');
 
-var _Client = require('../client');
+var _client = require('../client');
 
-var _Client2 = _interopRequireDefault(_Client);
+var _client2 = _interopRequireDefault(_client);
 
-var _Server2 = require('../server');
+var _server = require('../server');
 
-var _Server3 = _interopRequireDefault(_Server2);
+var _server2 = _interopRequireDefault(_server);
 
-var _hash = require('sha256');
+var _sha256 = require('sha256');
 
-var _hash2 = _interopRequireDefault(_hash);
+var _sha2562 = _interopRequireDefault(_sha256);
 
-var _createError = require('http-errors');
+var _httpErrors = require('http-errors');
 
-var _createError2 = _interopRequireDefault(_createError);
+var _httpErrors2 = _interopRequireDefault(_httpErrors);
 
-require('babel/polyfill');
 var _ = require('lodash');
 var should = require('should');
 var Promise = (global || window).Promise = require('bluebird');
@@ -62,10 +61,10 @@ _.defer(function () {
 
         return Promise['try'](function () {
           if (!_.isString(path)) {
-            throw _createError2['default'](400, 'Path should be a string.');
+            throw (0, _httpErrors2['default'])(400, 'Path should be a string.');
           }
           if (stores[path] === void 0) {
-            throw _createError2['default'](404, 'No such store.');
+            throw (0, _httpErrors2['default'])(404, 'No such store.');
           }
           return stores[path].toJSON();
         });
@@ -73,7 +72,7 @@ _.defer(function () {
     }]);
 
     return MyServer;
-  })(_Server3['default']);
+  })(_server2['default']);
 
   var server = new MyServer(43434);
   server.lifespan.onRelease(function () {
@@ -81,9 +80,9 @@ _.defer(function () {
   });
 
   // initialize several stores
-  var clock = stores['/clock'] = new _Lifespan$Remutable.Remutable({
+  var clock = stores['/clock'] = new _nexusFlux.Remutable({
     date: Date.now() });
-  var todoList = stores['/todoList'] = new _Lifespan$Remutable.Remutable({});
+  var todoList = stores['/todoList'] = new _nexusFlux.Remutable({});
 
   server.lifespan.setInterval(function () {
     server.dispatchUpdate('/clock', clock.set('date', Date.now()).commit());
@@ -95,7 +94,7 @@ _.defer(function () {
       var description = _ref2.description;
       var ownerKey = _ref2.ownerKey;
 
-      var item = { name: name, description: description, ownerHash: _hash2['default'](ownerKey) };
+      var item = { name: name, description: description, ownerHash: (0, _sha2562['default'])(ownerKey) };
       if (todoList.get(name) !== void 0) {
         return;
       }
@@ -111,7 +110,7 @@ _.defer(function () {
       }
       var ownerHash = item.ownerHash;
 
-      if (_hash2['default'](ownerKey) !== ownerHash) {
+      if ((0, _sha2562['default'])(ownerKey) !== ownerHash) {
         return;
       }
       server.dispatchUpdate('/todoList', todoList.set(name, void 0).commit());
@@ -131,12 +130,12 @@ _.defer(function () {
 
 _.defer(function () {
   // client main
-  var client = new _Client2['default']('http://127.0.0.1:43434');
+  var client = new _client2['default']('http://127.0.0.1:43434');
   client.lifespan.onRelease(function () {
     return console.log('client released');
   });
 
-  var ownerKey = _hash2['default']('' + Date.now() + ':' + _.random());
+  var ownerKey = (0, _sha2562['default'])('' + Date.now() + ':' + _.random());
   client.getStore('/clock', client.lifespan) // subscribe to a store
   .onUpdate(function (_ref5) {
     var head = _ref5.head;
@@ -149,7 +148,7 @@ _.defer(function () {
   });
 
   // this store subscribers has a limited lifespan (eg. a React components' own lifespan)
-  var todoListLifespan = new _Lifespan$Remutable.Lifespan();
+  var todoListLifespan = new _nexusFlux.Lifespan();
   var todoList = client.getStore('/todoList', todoListLifespan).onUpdate(function (_ref6, patch) {
     var head = _ref6.head;
 

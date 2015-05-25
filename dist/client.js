@@ -1,30 +1,31 @@
 'use strict';
 
-var _interopRequireDefault = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
+var _inherits = require('babel-runtime/helpers/inherits')['default'];
 
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
+var _get = require('babel-runtime/helpers/get')['default'];
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createClass = require('babel-runtime/helpers/create-class')['default'];
 
-var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+var _classCallCheck = require('babel-runtime/helpers/class-call-check')['default'];
 
-var _inherits = function (subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
+var _Object$defineProperty = require('babel-runtime/core-js/object/define-property')['default'];
 
-Object.defineProperty(exports, '__esModule', {
+var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
+
+_Object$defineProperty(exports, '__esModule', {
   value: true
 });
 
-var _IOClient = require('socket.io-client');
+var _socketIoClient = require('socket.io-client');
 
-var _IOClient2 = _interopRequireDefault(_IOClient);
+var _socketIoClient2 = _interopRequireDefault(_socketIoClient);
 
-var _Client$Server$Remutable = require('nexus-flux');
+var _nexusFlux = require('nexus-flux');
 
-var _Requester = require('immutable-request');
+var _immutableRequest = require('immutable-request');
 
-var _DEFAULT_SALT = require('./common');
+var _common = require('./common');
 
-require('babel/polyfill');
 var _ = require('lodash');
 var should = require('should');
 var Promise = (global || window).Promise = require('bluebird');
@@ -44,9 +45,10 @@ var SocketIOClient = (function (_Client) {
   // reqOpts is passed to Request constructor
 
   function SocketIOClient(uri) {
+    var salt = arguments[1] === undefined ? _common.DEFAULT_SALT : arguments[1];
+
     var _this = this;
 
-    var salt = arguments[1] === undefined ? _DEFAULT_SALT.DEFAULT_SALT : arguments[1];
     var sockOpts = arguments[2] === undefined ? {} : arguments[2];
     var reqOpts = arguments[3] === undefined ? {} : arguments[3];
 
@@ -62,7 +64,7 @@ var SocketIOClient = (function (_Client) {
     this._uri = uri;
     this._sockOpts = sockOpts;
     this._salt = salt;
-    this._requester = new _Requester.Requester(uri, reqOpts);
+    this._requester = new _immutableRequest.Requester(uri, reqOpts);
     this._ioClient = null;
     this.lifespan.onRelease(function () {
       _this._requester.cancelAll(new Error('Client lifespan released'));
@@ -81,7 +83,7 @@ var SocketIOClient = (function (_Client) {
       // lazily instanciate an actual socket; won't connect unless we need it.
       if (this._ioClient === null) {
         (function () {
-          _this2._ioClient = new _IOClient2['default'](_this2._uri, _this2._sockOpts);
+          _this2._ioClient = new _socketIoClient2['default'](_this2._uri, _this2._sockOpts);
           var receiveFromSocket = function receiveFromSocket(json) {
             return _this2.receiveFromSocket(json);
           };
@@ -112,14 +114,14 @@ var SocketIOClient = (function (_Client) {
         if (__DEV__) {
           js.should.be.an.Object;
         }
-        return _Client$Server$Remutable.Remutable.fromJS(js);
+        return _nexusFlux.Remutable.fromJS(js);
       });
     }
   }, {
     key: 'sendToServer',
     value: function sendToServer(ev) {
       if (__DEV__) {
-        ev.should.be.an.instanceOf(_Client$Server$Remutable.Client.Event);
+        ev.should.be.an.instanceOf(_nexusFlux.Client.Event);
       }
       this._io.emit(this._salt, ev.toJSON());
     }
@@ -129,16 +131,16 @@ var SocketIOClient = (function (_Client) {
       if (__DEV__) {
         json.should.be.a.String;
       }
-      var ev = _Client$Server$Remutable.Server.Event.fromJSON(json);
+      var ev = _nexusFlux.Server.Event.fromJSON(json);
       if (__DEV__) {
-        ev.should.be.an.instanceOf(_Client$Server$Remutable.Server.Event);
+        ev.should.be.an.instanceOf(_nexusFlux.Server.Event);
       }
       this.receiveFromServer(ev);
     }
   }]);
 
   return SocketIOClient;
-})(_Client$Server$Remutable.Client);
+})(_nexusFlux.Client);
 
 exports['default'] = SocketIOClient;
 module.exports = exports['default'];
