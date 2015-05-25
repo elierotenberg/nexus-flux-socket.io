@@ -28,7 +28,8 @@ class SocketIOClient extends Client {
     });
   }
 
-  get _io() { // lazily instanciate an actual socket; won't connect unless we need it.
+  // lazily instanciate an actual socket; won't connect unless we need it.
+  get _io() {
     if(this._ioClient === null) {
       this._ioClient = new IOClient(this._uri, this._sockOpts);
       const receiveFromSocket = (json) => this.receiveFromSocket(json);
@@ -50,7 +51,9 @@ class SocketIOClient extends Client {
     if(hash !== null) {
       path = path + ((path.indexOf('?') === -1) ? '?' : '&') + 'h=' + hash;
     }
-    return this._requester.GET(path) // eslint-disable-line new-cap
+    /* eslint-disable new-cap */
+    return this._requester.GET(path)
+    /* eslint-enable new-cap */
     .then((js) => {
       if(__DEV__) {
         js.should.be.an.Object;

@@ -3,7 +3,9 @@ import Client from '../client';
 import Server from '../server';
 import hash from 'sha256';
 import createError from 'http-errors';
-_.defer(() => { // server main
+
+// server main
+_.defer(() => {
 
   const stores = {};
 
@@ -34,9 +36,10 @@ _.defer(() => { // server main
   });
   const todoList = stores['/todoList'] = new Remutable({});
 
+  // update clock every 500ms
   server.lifespan.setInterval(() => {
     server.dispatchUpdate('/clock', clock.set('date', Date.now()).commit());
-  }, 500); // update clock every 500ms
+  }, 500);
 
   const actions = {
     '/addItem': ({ name, description, ownerKey }) => {
@@ -65,20 +68,24 @@ _.defer(() => { // server main
     }
   }, server.lifespan);
 
-  server.lifespan.setTimeout(server.lifespan.release, 10000); // release the server in 10000ms
+  // release the server in 10000ms
+  server.lifespan.setTimeout(server.lifespan.release, 10000);
 });
 
-_.defer(() => { // client main
+// client main
+_.defer(() => {
   const client = new Client('http://127.0.0.1:43434');
   client.lifespan.onRelease(() => console.log('client released'));
 
   const ownerKey = hash(`${Date.now()}:${_.random()}`);
-  client.getStore('/clock', client.lifespan) // subscribe to a store
+  // subscribe to a store
+  client.getStore('/clock', client.lifespan)
   .onUpdate(({ head }) => {
     // every time its updated (including when its first fetched), display the modified value (it is an Immutable.Map)
     console.log('clock tick', head.get('date'));
   })
-  .onDelete(() => { // if its deleted, then do something appropriate
+  // if its deleted, then do something appropriate
+  .onDelete(() => {
     console.log('clock deleted');
   });
 
@@ -87,34 +94,41 @@ _.defer(() => { // client main
   const todoList = client.getStore('/todoList', todoListLifespan)
   .onUpdate(({ head }, patch) => {
     // when its updated, we can access not only the up-to-date head, but also the underlying patch object
-    console.log('received todoList patch:', patch); // if we want to do something with it (we can ignore it as above)
+    // if we want to do something with it (we can ignore it as above)
+    console.log('received todoList patch:', patch);
     console.log('todoList head is now:', head.toJS());
   })
   .onDelete(() => {
     console.log('todoList deleted');
   });
 
-  client.dispatchAction('/addItem', { name: 'Harder', description: 'Code harder', ownerKey }); // dispatch some actions
+  // dispatch some actions
+  client.dispatchAction('/addItem', { name: 'Harder', description: 'Code harder', ownerKey });
   client.dispatchAction('/addItem', { name: 'Better', description: 'Code better', ownerKey });
   client.lifespan
+  // add a new item in 1000ms
   .setTimeout(() => client.dispatchAction('/addItem', {
     name: 'Faster',
     description: 'Code Faster',
     ownerKey,
-  }), 1000) // add a new item in 1000ms
+  }), 1000)
+  // remove an item in 2000ms
   .setTimeout(() => client.dispatchAction('/removeItem', {
     name: 'Harder',
     ownerKey,
-  }), 2000) // remove an item in 2000ms
+  }), 2000)
+  // add an item in 3000ms
   .setTimeout(() => client.dispatchAction('/addItem', {
     name: 'Stronger',
     description: 'Code stronger',
     ownerKey,
-  }), 3000) // add an item in 3000ms
-  .setTimeout(() => todoList.value.forEach(({ description }, name) => { // eslint-disable-line no-unused-vars
+  }), 3000)
   // remove every item in 4000
+  .setTimeout(() => todoList.value.forEach(({ description }, name) => {
     client.dispatchAction('/removeItem', { name, ownerKey });
   }), 4000)
-  .setTimeout(todoListLifespan.release, 5000) // release the subscriber in 5000ms
-  .setTimeout(client.lifespan.release, 6000); // release the client in 6000ms
+  // release the subscriber in 5000ms
+  .setTimeout(todoListLifespan.release, 5000)
+  // release the client in 6000ms
+  .setTimeout(client.lifespan.release, 6000);
 });

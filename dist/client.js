@@ -77,10 +77,11 @@ var SocketIOClient = (function (_Client) {
 
   _createClass(SocketIOClient, [{
     key: '_io',
+
+    // lazily instanciate an actual socket; won't connect unless we need it.
     get: function () {
       var _this2 = this;
 
-      // lazily instanciate an actual socket; won't connect unless we need it.
       if (this._ioClient === null) {
         (function () {
           _this2._ioClient = new _socketIoClient2['default'](_this2._uri, _this2._sockOpts);
@@ -109,7 +110,9 @@ var SocketIOClient = (function (_Client) {
       if (hash !== null) {
         path = path + (path.indexOf('?') === -1 ? '?' : '&') + 'h=' + hash;
       }
-      return this._requester.GET(path) // eslint-disable-line new-cap
+      /* eslint-disable new-cap */
+      return this._requester.GET(path)
+      /* eslint-enable new-cap */
       .then(function (js) {
         if (__DEV__) {
           js.should.be.an.Object;

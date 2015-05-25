@@ -7,7 +7,8 @@ import http from 'http';
 import IOServer from 'socket.io';
 import { DEFAULT_SALT } from './common';
 
-function isSocket(obj) { // ducktype-check
+// ducktype-check
+function isSocket(obj) {
   return _.isObject(obj) && _.isFunction(obj.emit) && _.isFunction(obj.addListener) && _.isFunction(obj.removeListener);
 }
 
@@ -68,15 +69,19 @@ class SocketIOServer extends Server {
       salt.should.be.a.String;
       sockOpts.should.be.an.Object;
       expressOpts.should.be.an.Object;
-      this.constructor.should.not.be.exactly(SocketIOServer); // ensure abstract
-      this.serveStore.should.not.be.exactly(SocketIOServer.prototype.serveStore); // ensure virtual
+      // ensure abstract
+      this.constructor.should.not.be.exactly(SocketIOServer);
+      // ensure virtual
+      this.serveStore.should.not.be.exactly(SocketIOServer.prototype.serveStore);
     }
     sockOpts.pingTimeout = sockOpts.pingTimeout || 5000;
     sockOpts.pingInterval = sockOpts.pingInterval || 5000;
 
     this._salt = salt;
     const app = express(expressOpts).use(cors());
-    const server = http.Server(app); // eslint-disable-line new-cap
+    /* eslint-disable new-cap */
+    const server = http.Server(app);
+    /* eslint-enable new-cap */
     const io = new IOServer(server, sockOpts);
     server.listen(port);
     app.get('*', (req, res) => this.serveStore(req)
@@ -96,9 +101,6 @@ class SocketIOServer extends Server {
     });
   }
 
-  /**
-   * @virtual
-   */
   serveStore({ path }) {
     return Promise.try(() => {
       if(__DEV__) {

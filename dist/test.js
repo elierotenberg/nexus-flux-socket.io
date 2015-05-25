@@ -40,8 +40,8 @@ if (__DEV__) {
   Error.stackTraceLimit = Infinity;
 }
 
+// server main
 _.defer(function () {
-  // server main
 
   var stores = {};
 
@@ -84,9 +84,10 @@ _.defer(function () {
     date: Date.now() });
   var todoList = stores['/todoList'] = new _nexusFlux.Remutable({});
 
+  // update clock every 500ms
   server.lifespan.setInterval(function () {
     server.dispatchUpdate('/clock', clock.set('date', Date.now()).commit());
-  }, 500); // update clock every 500ms
+  }, 500);
 
   var actions = {
     '/addItem': function addItem(_ref2) {
@@ -125,25 +126,27 @@ _.defer(function () {
     }
   }, server.lifespan);
 
-  server.lifespan.setTimeout(server.lifespan.release, 10000); // release the server in 10000ms
+  // release the server in 10000ms
+  server.lifespan.setTimeout(server.lifespan.release, 10000);
 });
 
+// client main
 _.defer(function () {
-  // client main
   var client = new _client2['default']('http://127.0.0.1:43434');
   client.lifespan.onRelease(function () {
     return console.log('client released');
   });
 
   var ownerKey = (0, _sha2562['default'])('' + Date.now() + ':' + _.random());
-  client.getStore('/clock', client.lifespan) // subscribe to a store
-  .onUpdate(function (_ref5) {
+  // subscribe to a store
+  client.getStore('/clock', client.lifespan).onUpdate(function (_ref5) {
     var head = _ref5.head;
 
     // every time its updated (including when its first fetched), display the modified value (it is an Immutable.Map)
     console.log('clock tick', head.get('date'));
-  }).onDelete(function () {
-    // if its deleted, then do something appropriate
+  })
+  // if its deleted, then do something appropriate
+  .onDelete(function () {
     console.log('clock deleted');
   });
 
@@ -153,38 +156,47 @@ _.defer(function () {
     var head = _ref6.head;
 
     // when its updated, we can access not only the up-to-date head, but also the underlying patch object
-    console.log('received todoList patch:', patch); // if we want to do something with it (we can ignore it as above)
+    // if we want to do something with it (we can ignore it as above)
+    console.log('received todoList patch:', patch);
     console.log('todoList head is now:', head.toJS());
   }).onDelete(function () {
     console.log('todoList deleted');
   });
 
-  client.dispatchAction('/addItem', { name: 'Harder', description: 'Code harder', ownerKey: ownerKey }); // dispatch some actions
+  // dispatch some actions
+  client.dispatchAction('/addItem', { name: 'Harder', description: 'Code harder', ownerKey: ownerKey });
   client.dispatchAction('/addItem', { name: 'Better', description: 'Code better', ownerKey: ownerKey });
-  client.lifespan.setTimeout(function () {
+  client.lifespan
+  // add a new item in 1000ms
+  .setTimeout(function () {
     return client.dispatchAction('/addItem', {
       name: 'Faster',
       description: 'Code Faster',
       ownerKey: ownerKey });
-  }, 1000) // add a new item in 1000ms
+  }, 1000)
+  // remove an item in 2000ms
   .setTimeout(function () {
     return client.dispatchAction('/removeItem', {
       name: 'Harder',
       ownerKey: ownerKey });
-  }, 2000) // remove an item in 2000ms
+  }, 2000)
+  // add an item in 3000ms
   .setTimeout(function () {
     return client.dispatchAction('/addItem', {
       name: 'Stronger',
       description: 'Code stronger',
       ownerKey: ownerKey });
-  }, 3000) // add an item in 3000ms
+  }, 3000)
+  // remove every item in 4000
   .setTimeout(function () {
     return todoList.value.forEach(function (_ref7, name) {
       var description = _ref7.description;
-      // eslint-disable-line no-unused-vars
-      // remove every item in 4000
+
       client.dispatchAction('/removeItem', { name: name, ownerKey: ownerKey });
     });
-  }, 4000).setTimeout(todoListLifespan.release, 5000) // release the subscriber in 5000ms
-  .setTimeout(client.lifespan.release, 6000); // release the client in 6000ms
+  }, 4000)
+  // release the subscriber in 5000ms
+  .setTimeout(todoListLifespan.release, 5000)
+  // release the client in 6000ms
+  .setTimeout(client.lifespan.release, 6000);
 });

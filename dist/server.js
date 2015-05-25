@@ -53,8 +53,8 @@ if (__DEV__) {
 }
 var Link = _nexusFlux.Server.Link;
 
+// ducktype-check
 function isSocket(obj) {
-  // ducktype-check
   return _.isObject(obj) && _.isFunction(obj.emit) && _.isFunction(obj.addListener) && _.isFunction(obj.removeListener);
 }
 
@@ -139,15 +139,19 @@ var SocketIOServer = (function (_Server) {
       salt.should.be.a.String;
       sockOpts.should.be.an.Object;
       expressOpts.should.be.an.Object;
-      this.constructor.should.not.be.exactly(SocketIOServer); // ensure abstract
-      this.serveStore.should.not.be.exactly(SocketIOServer.prototype.serveStore); // ensure virtual
+      // ensure abstract
+      this.constructor.should.not.be.exactly(SocketIOServer);
+      // ensure virtual
+      this.serveStore.should.not.be.exactly(SocketIOServer.prototype.serveStore);
     }
     sockOpts.pingTimeout = sockOpts.pingTimeout || 5000;
     sockOpts.pingInterval = sockOpts.pingInterval || 5000;
 
     this._salt = salt;
     var app = (0, _express2['default'])(expressOpts).use((0, _cors2['default'])());
-    var server = _http2['default'].Server(app); // eslint-disable-line new-cap
+    /* eslint-disable new-cap */
+    var server = _http2['default'].Server(app);
+    /* eslint-enable new-cap */
     var io = new _socketIo2['default'](server, sockOpts);
     server.listen(port);
     app.get('*', function (req, res) {
@@ -174,10 +178,6 @@ var SocketIOServer = (function (_Server) {
 
   _createClass(SocketIOServer, [{
     key: 'serveStore',
-
-    /**
-     * @virtual
-     */
     value: function serveStore(_ref) {
       var path = _ref.path;
 
