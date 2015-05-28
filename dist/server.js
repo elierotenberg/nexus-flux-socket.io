@@ -168,6 +168,7 @@ var SocketIOServer = (function (_Server) {
     io.on('connection', function (socket) {
       return _this2.acceptConnection(socket);
     });
+    this.app = app;
 
     this.lifespan.onRelease(function () {
       io.close();
@@ -177,6 +178,11 @@ var SocketIOServer = (function (_Server) {
   _inherits(SocketIOServer, _Server);
 
   _createClass(SocketIOServer, [{
+    key: 'use',
+    value: function use(middleware) {
+      this.app.use(middleware);
+    }
+  }, {
     key: 'serveStore',
     value: function serveStore(_ref) {
       var path = _ref.path;

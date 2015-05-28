@@ -95,10 +95,15 @@ class SocketIOServer extends Server {
         }
       }));
     io.on('connection', (socket) => this.acceptConnection(socket));
+    this.app = app;
 
     this.lifespan.onRelease(() => {
       io.close();
     });
+  }
+
+  use(middleware) {
+    this.app.use(middleware);
   }
 
   serveStore({ path }) {
