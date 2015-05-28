@@ -40,10 +40,6 @@ var _socketIo = require('socket.io');
 
 var _socketIo2 = _interopRequireDefault(_socketIo);
 
-var _morgan = require('morgan');
-
-var _morgan2 = _interopRequireDefault(_morgan);
-
 var _common = require('./common');
 
 var _ = require('lodash');
