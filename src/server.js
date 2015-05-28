@@ -5,6 +5,7 @@ import createError from 'http-errors';
 import cors from 'cors';
 import http from 'http';
 import IOServer from 'socket.io';
+import morgan from 'morgan';
 import { DEFAULT_SALT } from './common';
 
 // ducktype-check
@@ -62,7 +63,7 @@ class SocketIOServer extends Server {
   // salt is a disambiguation salt to allow multiplexing
   // sockOpts is passed to socket.io Server constructor
   // expressOpts is passed to express constructor
-  constructor(port, salt = DEFAULT_SALT, sockOpts = {}, expressOpts = {}) {
+  constructor(port, salt = DEFAULT_SALT, sockOpts = {}, expressOpts = {}, ...args) {
     super();
     if(__DEV__) {
       port.should.be.a.Number.which.is.above(0);
@@ -78,7 +79,8 @@ class SocketIOServer extends Server {
     sockOpts.pingInterval = sockOpts.pingInterval || 5000;
 
     this._salt = salt;
-    const app = express(expressOpts).use(cors());
+    const app = express(expressOpts);
+    app.use(...args.concat(cors()));
     /* eslint-disable new-cap */
     const server = http.Server(app);
     /* eslint-enable new-cap */
@@ -95,15 +97,10 @@ class SocketIOServer extends Server {
         }
       }));
     io.on('connection', (socket) => this.acceptConnection(socket));
-    this._app = app;
 
     this.lifespan.onRelease(() => {
       io.close();
     });
-  }
-
-  use(...args) {
-    this._app.use(...args);
   }
 
   serveStore({ path }) {

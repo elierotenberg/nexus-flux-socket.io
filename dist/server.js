@@ -8,6 +8,8 @@ var _createClass = require('babel-runtime/helpers/create-class')['default'];
 
 var _classCallCheck = require('babel-runtime/helpers/class-call-check')['default'];
 
+var _toConsumableArray = require('babel-runtime/helpers/to-consumable-array')['default'];
+
 var _Object$defineProperty = require('babel-runtime/core-js/object/define-property')['default'];
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -37,6 +39,10 @@ var _http2 = _interopRequireDefault(_http);
 var _socketIo = require('socket.io');
 
 var _socketIo2 = _interopRequireDefault(_socketIo);
+
+var _morgan = require('morgan');
+
+var _morgan2 = _interopRequireDefault(_morgan);
 
 var _common = require('./common');
 
@@ -124,6 +130,10 @@ var SocketIOServer = (function (_Server) {
   // expressOpts is passed to express constructor
 
   function SocketIOServer(port) {
+    for (var _len = arguments.length, args = Array(_len > 4 ? _len - 4 : 0), _key = 4; _key < _len; _key++) {
+      args[_key - 4] = arguments[_key];
+    }
+
     var salt = arguments[1] === undefined ? _common.DEFAULT_SALT : arguments[1];
 
     var _this2 = this;
@@ -148,7 +158,8 @@ var SocketIOServer = (function (_Server) {
     sockOpts.pingInterval = sockOpts.pingInterval || 5000;
 
     this._salt = salt;
-    var app = (0, _express2['default'])(expressOpts).use((0, _cors2['default'])());
+    var app = (0, _express2['default'])(expressOpts);
+    app.use.apply(app, _toConsumableArray(args.concat((0, _cors2['default'])())));
     /* eslint-disable new-cap */
     var server = _http2['default'].Server(app);
     /* eslint-enable new-cap */
@@ -168,7 +179,6 @@ var SocketIOServer = (function (_Server) {
     io.on('connection', function (socket) {
       return _this2.acceptConnection(socket);
     });
-    this._app = app;
 
     this.lifespan.onRelease(function () {
       io.close();
@@ -178,17 +188,6 @@ var SocketIOServer = (function (_Server) {
   _inherits(SocketIOServer, _Server);
 
   _createClass(SocketIOServer, [{
-    key: 'use',
-    value: function use() {
-      var _app;
-
-      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
-      }
-
-      (_app = this._app).use.apply(_app, args);
-    }
-  }, {
     key: 'serveStore',
     value: function serveStore(_ref) {
       var path = _ref.path;
