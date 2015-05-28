@@ -5,7 +5,6 @@ import createError from 'http-errors';
 import cors from 'cors';
 import http from 'http';
 import IOServer from 'socket.io';
-import morgan from 'morgan';
 import { DEFAULT_SALT } from './common';
 
 // ducktype-check
