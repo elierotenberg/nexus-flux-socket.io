@@ -126,16 +126,13 @@ var SocketIOServer = (function (_Server) {
   // expressOpts is passed to express constructor
 
   function SocketIOServer(port) {
-    for (var _len = arguments.length, args = Array(_len > 4 ? _len - 4 : 0), _key = 4; _key < _len; _key++) {
-      args[_key - 4] = arguments[_key];
-    }
-
     var salt = arguments[1] === undefined ? _common.DEFAULT_SALT : arguments[1];
+    var sockOpts = arguments[2] === undefined ? {} : arguments[2];
 
     var _this2 = this;
 
-    var sockOpts = arguments[2] === undefined ? {} : arguments[2];
     var expressOpts = arguments[3] === undefined ? {} : arguments[3];
+    var expressUse = arguments[4] === undefined ? [] : arguments[4];
 
     _classCallCheck(this, SocketIOServer);
 
@@ -155,7 +152,7 @@ var SocketIOServer = (function (_Server) {
 
     this._salt = salt;
     var app = (0, _express2['default'])(expressOpts);
-    app.use.apply(app, _toConsumableArray(args.concat((0, _cors2['default'])())));
+    app.use.apply(app, _toConsumableArray(expressUse.concat((0, _cors2['default'])())));
     /* eslint-disable new-cap */
     var server = _http2['default'].Server(app);
     /* eslint-enable new-cap */

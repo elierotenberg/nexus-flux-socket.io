@@ -62,7 +62,7 @@ class SocketIOServer extends Server {
   // salt is a disambiguation salt to allow multiplexing
   // sockOpts is passed to socket.io Server constructor
   // expressOpts is passed to express constructor
-  constructor(port, salt = DEFAULT_SALT, sockOpts = {}, expressOpts = {}, ...args) {
+  constructor(port, salt = DEFAULT_SALT, sockOpts = {}, expressOpts = {}, expressUse = []) {
     super();
     if(__DEV__) {
       port.should.be.a.Number.which.is.above(0);
@@ -79,7 +79,7 @@ class SocketIOServer extends Server {
 
     this._salt = salt;
     const app = express(expressOpts);
-    app.use(...args.concat(cors()));
+    app.use(...expressUse.concat(cors()));
     /* eslint-disable new-cap */
     const server = http.Server(app);
     /* eslint-enable new-cap */
