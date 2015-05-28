@@ -95,7 +95,7 @@ class SocketIOServer extends Server {
         }
       }));
     io.on('connection', (socket) => this.acceptConnection(socket));
-    this.app = app;
+    this._app = app;
 
     this.lifespan.onRelease(() => {
       io.close();
@@ -103,7 +103,7 @@ class SocketIOServer extends Server {
   }
 
   use(middleware) {
-    this.app.use(middleware);
+    this._app.use(middleware);
   }
 
   serveStore({ path }) {

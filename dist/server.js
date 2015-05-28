@@ -168,7 +168,7 @@ var SocketIOServer = (function (_Server) {
     io.on('connection', function (socket) {
       return _this2.acceptConnection(socket);
     });
-    this.app = app;
+    this._app = app;
 
     this.lifespan.onRelease(function () {
       io.close();
@@ -180,7 +180,7 @@ var SocketIOServer = (function (_Server) {
   _createClass(SocketIOServer, [{
     key: 'use',
     value: function use(middleware) {
-      this.app.use(middleware);
+      this._app.use(middleware);
     }
   }, {
     key: 'serveStore',
