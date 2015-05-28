@@ -102,8 +102,8 @@ class SocketIOServer extends Server {
     });
   }
 
-  use(...middlewares) {
-    this._app.use(...middlewares);
+  use(...args) {
+    this._app.use(...args);
   }
 
   serveStore({ path }) {

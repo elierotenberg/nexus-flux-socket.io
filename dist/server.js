@@ -182,11 +182,11 @@ var SocketIOServer = (function (_Server) {
     value: function use() {
       var _app;
 
-      for (var _len = arguments.length, middlewares = Array(_len), _key = 0; _key < _len; _key++) {
-        middlewares[_key] = arguments[_key];
+      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
       }
 
-      (_app = this._app).use.apply(_app, middlewares);
+      (_app = this._app).use.apply(_app, args);
     }
   }, {
     key: 'serveStore',
