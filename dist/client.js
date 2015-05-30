@@ -88,9 +88,14 @@ var SocketIOClient = (function (_Client) {
           var receiveFromSocket = function receiveFromSocket(json) {
             return _this2.receiveFromSocket(json);
           };
+          var forceResync = function forceResync() {
+            return _this2.forceResync();
+          };
           _this2._ioClient.on(_this2._salt, receiveFromSocket);
+          _this2._ioClient.on('reconnect', forceResync);
           _this2.lifespan.onRelease(function () {
             _this2._ioClient.off(_this2._salt, receiveFromSocket);
+            _this2._ioClient.off('reconnect', forceResync);
             _this2._ioClient.disconnect();
             _this2._ioClient = null;
           });
