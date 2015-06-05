@@ -85,6 +85,7 @@ var SocketIOClient = (function (_Client) {
       if (this._ioClient === null) {
         (function () {
           _this2._ioClient = new _socketIoClient2['default'](_this2._uri, _this2._sockOpts);
+          _this2._ioClient.connect();
           var receiveFromSocket = function receiveFromSocket(json) {
             return _this2.receiveFromSocket(json);
           };

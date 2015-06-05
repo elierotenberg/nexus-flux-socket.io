@@ -32,6 +32,7 @@ class SocketIOClient extends Client {
   get _io() {
     if(this._ioClient === null) {
       this._ioClient = new IOClient(this._uri, this._sockOpts);
+      this._ioClient.connect();
       const receiveFromSocket = (json) => this.receiveFromSocket(json);
       const forceResync = () => this.forceResync();
       this._ioClient.on(this._salt, receiveFromSocket);
