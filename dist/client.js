@@ -76,35 +76,6 @@ var SocketIOClient = (function (_Client) {
   _inherits(SocketIOClient, _Client);
 
   _createClass(SocketIOClient, [{
-    key: '_io',
-
-    // lazily instanciate an actual socket; won't connect unless we need it.
-    get: function () {
-      var _this2 = this;
-
-      if (this._ioClient === null) {
-        (function () {
-          _this2._ioClient = new _socketIoClient2['default'](_this2._uri, _this2._sockOpts);
-          _this2._ioClient.connect();
-          var receiveFromSocket = function receiveFromSocket(json) {
-            return _this2.receiveFromSocket(json);
-          };
-          var forceResync = function forceResync() {
-            return _this2.forceResync();
-          };
-          _this2._ioClient.on(_this2._salt, receiveFromSocket);
-          _this2._ioClient.on('reconnect', forceResync);
-          _this2.lifespan.onRelease(function () {
-            _this2._ioClient.off(_this2._salt, receiveFromSocket);
-            _this2._ioClient.off('reconnect', forceResync);
-            _this2._ioClient.disconnect();
-            _this2._ioClient = null;
-          });
-        })();
-      }
-      return this._ioClient;
-    }
-  }, {
     key: 'fetch',
     value: function fetch(path) {
       var hash = arguments[1] === undefined ? null : arguments[1];
@@ -145,6 +116,35 @@ var SocketIOClient = (function (_Client) {
         ev.should.be.an.instanceOf(_nexusFlux.Server.Event);
       }
       this.receiveFromServer(ev);
+    }
+  }, {
+    key: '_io',
+
+    // lazily instanciate an actual socket; won't connect unless we need it.
+    get: function () {
+      var _this2 = this;
+
+      if (this._ioClient === null) {
+        (function () {
+          _this2._ioClient = new _socketIoClient2['default'](_this2._uri, _this2._sockOpts);
+          _this2._ioClient.connect();
+          var receiveFromSocket = function receiveFromSocket(json) {
+            return _this2.receiveFromSocket(json);
+          };
+          var forceResync = function forceResync() {
+            return _this2.forceResync();
+          };
+          _this2._ioClient.on(_this2._salt, receiveFromSocket);
+          _this2._ioClient.on('reconnect', forceResync);
+          _this2.lifespan.onRelease(function () {
+            _this2._ioClient.off(_this2._salt, receiveFromSocket);
+            _this2._ioClient.off('reconnect', forceResync);
+            _this2._ioClient.disconnect();
+            _this2._ioClient = null;
+          });
+        })();
+      }
+      return this._ioClient;
     }
   }]);
 

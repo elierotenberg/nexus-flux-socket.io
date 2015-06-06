@@ -81,7 +81,8 @@ _.defer(function () {
 
   // initialize several stores
   var clock = stores['/clock'] = new _nexusFlux.Remutable({
-    date: Date.now() });
+    date: Date.now()
+  });
   var todoList = stores['/todoList'] = new _nexusFlux.Remutable({});
 
   // update clock every 500ms
@@ -115,7 +116,8 @@ _.defer(function () {
         return;
       }
       server.dispatchUpdate('/todoList', todoList.set(name, void 0).commit());
-    } };
+    }
+  };
 
   server.on('action', function (_ref4) {
     var path = _ref4.path;
@@ -172,20 +174,23 @@ _.defer(function () {
     return client.dispatchAction('/addItem', {
       name: 'Faster',
       description: 'Code Faster',
-      ownerKey: ownerKey });
+      ownerKey: ownerKey
+    });
   }, 1000)
   // remove an item in 2000ms
   .setTimeout(function () {
     return client.dispatchAction('/removeItem', {
       name: 'Harder',
-      ownerKey: ownerKey });
+      ownerKey: ownerKey
+    });
   }, 2000)
   // add an item in 3000ms
   .setTimeout(function () {
     return client.dispatchAction('/addItem', {
       name: 'Stronger',
       description: 'Code stronger',
-      ownerKey: ownerKey });
+      ownerKey: ownerKey
+    });
   }, 3000)
   // remove every item in 4000
   .setTimeout(function () {
