@@ -123,7 +123,8 @@ var SocketIOServer = (function (_Server) {
   // port is the port to listen to
   // salt is a disambiguation salt to allow multiplexing
   // sockOpts is passed to socket.io Server constructor
-  // expressOpts is passed to express constructor
+  // headers is an object of HTTP's response headers to use
+  // expressUse is an array of middlewares to use
 
   function SocketIOServer(port) {
     var salt = arguments[1] === undefined ? _common.DEFAULT_SALT : arguments[1];
@@ -131,7 +132,7 @@ var SocketIOServer = (function (_Server) {
 
     var _this2 = this;
 
-    var expressOpts = arguments[3] === undefined ? {} : arguments[3];
+    var headers = arguments[3] === undefined ? {} : arguments[3];
     var expressUse = arguments[4] === undefined ? [] : arguments[4];
 
     _classCallCheck(this, SocketIOServer);
@@ -141,26 +142,23 @@ var SocketIOServer = (function (_Server) {
       port.should.be.a.Number.which.is.above(0);
       salt.should.be.a.String;
       sockOpts.should.be.an.Object;
-      expressOpts.should.be.an.Object;
-      // ensure abstract
-      this.constructor.should.not.be.exactly(SocketIOServer);
-      // ensure virtual
-      this.serveStore.should.not.be.exactly(SocketIOServer.prototype.serveStore);
+      headers.should.be.an.Object;
+      expressUse.should.be.an.Array;
+      this.constructor.should.not.be.exactly(SocketIOServer); // ensure abstract
+      this.serveStore.should.not.be.exactly(SocketIOServer.prototype.serveStore); // ensure virtual
     }
     sockOpts.pingTimeout = sockOpts.pingTimeout || 5000;
     sockOpts.pingInterval = sockOpts.pingInterval || 5000;
 
     this._salt = salt;
-    var app = (0, _express2['default'])(expressOpts);
+    var app = (0, _express2['default'])();
     app.use.apply(app, _toConsumableArray(expressUse.concat((0, _cors2['default'])())));
-    /* eslint-disable new-cap */
-    var server = _http2['default'].Server(app);
-    /* eslint-enable new-cap */
+    var server = _http2['default'].Server(app); // eslint-disable-line new-cap
     var io = new _socketIo2['default'](server, sockOpts);
     server.listen(port);
     app.get('*', function (req, res) {
       return _this2.serveStore(req).then(function (json) {
-        return res.type('json').send(json);
+        return res.set(headers).type('json').send(json);
       })['catch'](function (error) {
         if (error.status !== void 0) {
           res.status(error.status).json(error);
