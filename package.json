@@ -5,6 +5,7 @@
   "license": "MIT",
   "author": "Elie Rotenberg <elie@rotenberg.io>",
   "main": "src/index.js",
+  "description": "",
   "repository": {
     "type": "git",
     "url": "https://github.com/elierotenberg/nexus-flux-socket.io.git"
@@ -22,7 +23,6 @@
     "babel-runtime": "^5.5.8",
     "eslint": "^0.23.0",
     "eslint-plugin-react": "^2.5.2",
-    "express": "^4.12.4",
     "gulp": "^3.9.0",
     "gulp-eslint": "^0.14.0",
     "gulp-mocha": "^2.1.1",
@@ -32,6 +32,7 @@
     "asap": "^2.0.3",
     "bluebird": "^2.9.30",
     "cors": "^2.7.1",
+    "express": "^4.12.4",
     "http-errors": "^1.3.1",
     "immutable-request": "^1.0.0",
     "lodash": "^3.9.3",

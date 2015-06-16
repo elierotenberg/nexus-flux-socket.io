@@ -61,32 +61,30 @@ class SocketIOServer extends Server {
   // port is the port to listen to
   // salt is a disambiguation salt to allow multiplexing
   // sockOpts is passed to socket.io Server constructor
-  // expressOpts is passed to express constructor
-  constructor(port, salt = DEFAULT_SALT, sockOpts = {}, expressOpts = {}, expressUse = []) {
+  // headers is an object of HTTP's response headers to use
+  // expressUse is an array of middlewares to use
+  constructor(port, salt = DEFAULT_SALT, sockOpts = {}, headers = {}, expressUse = []) {
     super();
     if(__DEV__) {
       port.should.be.a.Number.which.is.above(0);
       salt.should.be.a.String;
       sockOpts.should.be.an.Object;
-      expressOpts.should.be.an.Object;
-      // ensure abstract
-      this.constructor.should.not.be.exactly(SocketIOServer);
-      // ensure virtual
-      this.serveStore.should.not.be.exactly(SocketIOServer.prototype.serveStore);
+      headers.should.be.an.Object;
+      expressUse.should.be.an.Array;
+      this.constructor.should.not.be.exactly(SocketIOServer); // ensure abstract
+      this.serveStore.should.not.be.exactly(SocketIOServer.prototype.serveStore); // ensure virtual
     }
     sockOpts.pingTimeout = sockOpts.pingTimeout || 5000;
     sockOpts.pingInterval = sockOpts.pingInterval || 5000;
 
     this._salt = salt;
-    const app = express(expressOpts);
+    const app = express();
     app.use(...expressUse.concat(cors()));
-    /* eslint-disable new-cap */
-    const server = http.Server(app);
-    /* eslint-enable new-cap */
+    const server = http.Server(app); // eslint-disable-line new-cap
     const io = new IOServer(server, sockOpts);
     server.listen(port);
     app.get('*', (req, res) => this.serveStore(req)
-      .then((json) => res.type('json').send(json))
+      .then((json) => res.set(headers).type('json').send(json))
       .catch((error) => {
         if(error.status !== void 0) {
           res.status(error.status).json(error);

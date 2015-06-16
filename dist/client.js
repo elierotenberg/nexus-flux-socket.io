@@ -87,9 +87,7 @@ var SocketIOClient = (function (_Client) {
       if (hash !== null) {
         path = path + (path.indexOf('?') === -1 ? '?' : '&') + 'h=' + hash;
       }
-      /* eslint-disable new-cap */
-      return this._requester.GET(path)
-      /* eslint-enable new-cap */
+      return this._requester.GET(path) // eslint-disable-line new-cap
       .then(function (js) {
         if (__DEV__) {
           js.should.be.an.Object;
