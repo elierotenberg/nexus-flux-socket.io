@@ -1,11 +1,10 @@
 {
   "name": "nexus-flux-socket.io",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "",
   "license": "MIT",
   "author": "Elie Rotenberg <elie@rotenberg.io>",
   "main": "src/index.js",
-  "description": "",
   "repository": {
     "type": "git",
     "url": "https://github.com/elierotenberg/nexus-flux-socket.io.git"
