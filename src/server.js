@@ -6,6 +6,9 @@ import cors from 'cors';
 import http from 'http';
 import IOServer from 'socket.io';
 import { DEFAULT_SALT } from './common';
+const __DEV__ = process.env.NODE_ENV === 'development';
+import Promise from 'bluebird';
+import _ from 'lodash';
 
 // ducktype-check
 function isSocket(obj) {
@@ -54,9 +57,6 @@ class SocketIOLink extends Link {
   }
 }
 
-/**
- * @abstract
- */
 class SocketIOServer extends Server {
   // port is the port to listen to
   // salt is a disambiguation salt to allow multiplexing

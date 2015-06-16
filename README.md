@@ -96,3 +96,7 @@ removeItem.onDispatch((clientID, { name }) => {
   todoList.delete(name).commit();
 });
 ```
+
+#### Installation
+
+This package is written in ES6/7. You will need `babel` to run it.

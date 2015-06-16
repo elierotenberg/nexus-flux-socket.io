@@ -2,6 +2,8 @@ import IOClient from 'socket.io-client';
 import { Client, Server, Remutable } from 'nexus-flux';
 import { Requester } from 'immutable-request';
 import { DEFAULT_SALT } from './common';
+const __DEV__ = process.env.NODE_ENV === 'development';
+import _ from 'lodash';
 
 class SocketIOClient extends Client {
   // uri is the endpoint which the client will attempt to connect to
